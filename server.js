@@ -4,6 +4,12 @@ const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
+
+console.log('--- Environment Check ---');
+console.log('ADMIN_EMAIL:', process.env.ADMIN_EMAIL ? 'Set' : 'MISSING');
+console.log('ADMIN_PASSWORD:', process.env.ADMIN_PASSWORD ? 'Set' : 'MISSING');
+console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? 'Set' : 'MISSING');
+console.log('-------------------------');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -97,6 +103,8 @@ if (adminEmail && adminPassword) {
       .run(hashedPassword, 'admin', existing.id);
     console.log('✅ Admin account synced:', adminEmail);
   }
+} else {
+  console.warn('⚠️  ADMIN_EMAIL or ADMIN_PASSWORD not set in environment. Skipping admin seeding.');
 }
 
 const PORT = process.env.PORT || 3000;
