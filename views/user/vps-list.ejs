@@ -46,21 +46,16 @@
                 <div class="vps-spec-label">GB Disk</div>
               </div>
             </div>
-            <% if (v.ipAddress) { %>
-              <div class="vps-ip"><i class="fas fa-network-wired"></i>
-                <%= v.ipAddress %>
-              </div>
-              <% } %>
-                <div class="vps-actions">
-                  <a href="/vps/<%= v._id || v.id %>" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i>
-                    Details</a>
-                  <button class="btn btn-success btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'start')"><i
-                      class="fas fa-play"></i></button>
-                  <button class="btn btn-warning btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'stop')"><i
-                      class="fas fa-stop"></i></button>
-                  <button class="btn btn-secondary btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'restart')"><i
-                      class="fas fa-redo"></i></button>
-                </div>
+            <div class="vps-actions">
+              <a href="/vps/<%= v._id || v.id %>" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i>
+                Details</a>
+              <button class="btn btn-success btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'start')"><i
+                  class="fas fa-play"></i></button>
+              <button class="btn btn-warning btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'stop')"><i
+                  class="fas fa-stop"></i></button>
+              <button class="btn btn-secondary btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'restart')"><i
+                  class="fas fa-redo"></i></button>
+            </div>
           </div>
           <% }); %>
       </div>

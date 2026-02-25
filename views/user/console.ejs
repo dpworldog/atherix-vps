@@ -1,0 +1,86 @@
+<% var activePage='vps' ; %>
+    <%- include('../partials/layout-top') %>
+
+        <div class="flex-between mb-24">
+            <div class="flex-center gap-12">
+                <a href="/vps/<%= vps.id %>" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+                <h2 style="font-size: 20px; font-weight: 800;">VPS Console: <%= vps.name %>
+                </h2>
+            </div>
+            <div id="terminal-status" class="badge badge-running">Connecting...</div>
+        </div>
+
+        <div class="card p-0 overflow-hidden"
+            style="background: #000; border: 1px solid var(--border-color); height: 600px;">
+            <div id="terminal" style="height: 100%; padding: 10px;"></div>
+        </div>
+
+        <div class="mt-16 flex-between">
+            <p class="text-secondary" style="font-size: 12px;">
+                <i class="fas fa-info-circle"></i> Use the console to manage your VPS directly. Type 'exit' to close.
+            </p>
+            <button class="btn btn-secondary btn-sm" onclick="location.reload()"><i class="fas fa-sync"></i>
+                Reconnect</button>
+        </div>
+
+        <!-- XTerm.js -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+
+        <script>
+            const vpsId = '<%= vps.id %>';
+            const containerId = '<%= vps.containerId %>';
+
+            const term = new Terminal({
+                cursorBlink: true,
+                fontFamily: 'JetBrains Mono, Menlo, monospace',
+                fontSize: 14,
+                theme: {
+                    background: '#000000',
+                    foreground: '#ffffff',
+                    cursor: '#ffffff'
+                }
+            });
+
+            const fitAddon = new FitAddon.FitAddon();
+            term.loadAddon(fitAddon);
+            term.open(document.getElementById('terminal'));
+            fitAddon.fit();
+
+            const socket = io();
+            const statusElement = document.getElementById('terminal-status');
+
+            socket.on('connect', () => {
+                statusElement.innerText = 'Connected';
+                statusElement.className = 'badge badge-running';
+
+                // Join the console session
+                socket.emit('terminal-join', { vpsId, containerId });
+            });
+
+            socket.on('disconnect', () => {
+                statusElement.innerText = 'Disconnected';
+                statusElement.className = 'badge badge-error';
+                term.write('\r\n\x1b[31m[Disconnected from server]\x1b[0m\r\n');
+            });
+
+            socket.on('terminal-output', (data) => {
+                term.write(data);
+            });
+
+            socket.on('terminal-error', (msg) => {
+                term.write('\r\n\x1b[31m[Error: ' + msg + ']\x1b[0m\r\n');
+            });
+
+            term.onData((data) => {
+                socket.emit('terminal-input', data);
+            });
+
+            window.addEventListener('resize', () => {
+                fitAddon.fit();
+            });
+        </script>
+
+        <%- include('../partials/layout-bottom') %>

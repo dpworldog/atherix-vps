@@ -43,15 +43,15 @@
       <div class="grid-2">
         <div>
           <div class="form-group">
-            <label class="form-label">IP Address</label>
-            <div class="vps-ip"><i class="fas fa-network-wired"></i>
-              <%= typeof vps !=='undefined' && vps.ipAddress ? vps.ipAddress : 'Pending' %>
-            </div>
-          </div>
-          <div class="form-group">
             <label class="form-label">Container ID</label>
             <div class="vps-ip mono"><i class="fas fa-fingerprint"></i>
               <%= typeof vps !=='undefined' ? (vps.containerId || 'N/A' ) : 'N/A' %>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hostname</label>
+            <div class="vps-ip"><i class="fas fa-terminal"></i>
+              <%= typeof vps !=='undefined' ? (vps.hostname || 'N/A' ) : 'N/A' %>
             </div>
           </div>
         </div>
@@ -88,6 +88,8 @@
               class="fas fa-stop"></i> Stop</button>
           <button class="btn btn-secondary" onclick="vpsAction(<%= vps._id || vps.id %>, 'restart')"><i
               class="fas fa-redo"></i> Restart</button>
+          <a href="/vps/<%= vps._id || vps.id %>/console" class="btn btn-primary"><i class="fas fa-terminal"></i>
+            Console</a>
         </div>
         <% } %>
     </div>

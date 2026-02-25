@@ -18,7 +18,6 @@
               <th>Name</th>
               <th>Owner</th>
               <th>Specs</th>
-              <th>IP Address</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -42,9 +41,6 @@
                   </td>
                   <td class="mono text-sm">
                     <%= v.cpu || 1 %>C / <%= v.ram || 512 %>MB / <%= v.disk || 10 %>GB
-                  </td>
-                  <td class="mono text-sm">
-                    <%= v.ipAddress || 'Pending' %>
                   </td>
                   <td><span class="badge badge-<%= v.status || 'creating' %>"><span class="badge-dot"></span>
                       <%= v.status || 'creating' %>

@@ -17,6 +17,10 @@ const { Server } = require('socket.io');
 // Initialize SQLite database
 require('./db/database');
 
+// LXC/LXD Manager
+const lxc = require('./config/lxc');
+lxc.checkReady();
+
 // Init app
 const app = express();
 const server = http.createServer(app);
@@ -78,10 +82,55 @@ app.use((err, req, res, next) => {
   res.status(500).render('error', { title: '500 - Server Error', message: '500 - Internal Server Error', user: req.user });
 });
 
-// Socket.io for real-time VPS status
+// Socket.io for real-time VPS status and Terminal
+const { spawn } = require('child_process');
+
 io.on('connection', (socket) => {
   socket.on('subscribe-vps', (vpsId) => {
     socket.join(`vps-${vpsId}`);
+  });
+
+  // Terminal handling
+  let termProcess = null;
+
+  socket.on('terminal-join', ({ vpsId, containerId }) => {
+    if (termProcess) {
+      termProcess.kill();
+    }
+
+    console.log(`[Terminal] User joined console for ${containerId}`);
+
+    // Spawn lxc exec
+    // Note: We use --force if we want to ensure it works, but lxc exec is better
+    // We use "bash" but if it fails we might try "sh"
+    termProcess = spawn('lxc', ['exec', containerId, '--', 'bash']);
+
+    termProcess.stdout.on('data', (data) => {
+      socket.emit('terminal-output', data.toString());
+    });
+
+    termProcess.stderr.on('data', (data) => {
+      socket.emit('terminal-output', data.toString());
+    });
+
+    termProcess.on('exit', (code) => {
+      console.log(`[Terminal] Process exited for ${containerId} with code ${code}`);
+      socket.emit('terminal-output', '\r\n\x1b[33m[Session Terminated]\x1b[0m\r\n');
+      termProcess = null;
+    });
+
+    socket.on('terminal-input', (data) => {
+      if (termProcess) {
+        termProcess.stdin.write(data);
+      }
+    });
+
+    socket.on('disconnect', () => {
+      if (termProcess) {
+        termProcess.kill();
+        termProcess = null;
+      }
+    });
   });
 });
 

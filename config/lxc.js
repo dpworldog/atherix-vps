@@ -8,59 +8,75 @@ class LXCManager {
     this.cmd = 'lxc';
   }
 
+  getDistro(os, version) {
+    // Map human friendly names to LXD remotes
+    // 'ubuntu:' is the official Ubuntu remote, 'images:' is the community remote
+    const distros = {
+      ubuntu: { remote: 'ubuntu:', dist: version || '22.04' },
+      debian: { remote: 'images:', dist: `debian/${(version === 'bookworm' ? '12' : version) || '12'}` },
+      centos: { remote: 'images:', dist: `centos/${version || '9-Stream'}` },
+      alpine: { remote: 'images:', dist: `alpine/${version || '3.18'}` },
+      fedora: { remote: 'images:', dist: `fedora/${version || '38'}` }
+    };
+    return distros[os] || distros.ubuntu;
+  }
+
   async createContainer(name, os, osVersion, cpu, ram, disk, features = {}) {
     const distro = this.getDistro(os, osVersion);
-    // LXD image format: images:distro/release/arch
-    const image = `images:${distro.dist}/${distro.release}`;
+    const image = `${distro.remote}${distro.dist}`;
 
     console.log(`[LXD] Creating container ${name} from ${image}`);
 
     try {
-      // 1. Initialize container (creates it but doesn't start it yet)
-      await execAsync(`${this.cmd} init ${image} ${name}`);
+      // 1. Initialize container
+      console.log(`[LXD] Executing: ${this.cmd} init ${image} ${name}`);
+      const initResult = await execAsync(`${this.cmd} init ${image} ${name}`).catch(e => {
+        console.error(`[LXD] Init Command Failed: ${e.message}`);
+        if (e.stderr) console.error(`[LXD] Init Stderr: ${e.stderr}`);
+        throw e;
+      });
+
+      if (initResult.stdout) console.log(`[LXD] Init stdout: ${initResult.stdout}`);
 
       // 2. Set resource limits
       await execAsync(`${this.cmd} config set ${name} limits.cpu ${cpu}`);
       await execAsync(`${this.cmd} config set ${name} limits.memory ${ram}MB`);
 
-      // 3. Setup Disk (Attempts to set root disk size)
+      // 3. Setup Disk
       try {
-        // This requires the container to be using a storage pool that supports resizing
         await execAsync(`${this.cmd} config device set ${name} root size ${disk}GB`);
       } catch (e) {
-        console.warn(`[LXD] Disk size setting skipped or failed: ${e.message}`);
+        console.warn(`[LXD] Disk size setting failed: ${e.message}`);
       }
 
-      // 4. Set Features/Security
-      if (features.nesting) {
-        await execAsync(`${this.cmd} config set ${name} security.nesting true`);
-      }
-
+      // 4. Set Features
+      if (features.nesting) await execAsync(`${this.cmd} config set ${name} security.nesting true`);
       if (features.docker) {
         await execAsync(`${this.cmd} config set ${name} security.nesting true`);
         await execAsync(`${this.cmd} config set ${name} security.privileged true`);
       }
 
-      // 5. Start the container
+      // 5. Start
       await this.startContainer(name);
 
       return { success: true };
     } catch (err) {
-      console.error(`[LXD] Create failed: ${err.message}`);
-      return { success: false, error: err.message };
+      return { success: false, error: err.stderr || err.message };
     }
   }
 
-  getDistro(os, version) {
-    // Map human friendly names to LXD periodic image names
-    const distros = {
-      ubuntu: { dist: 'ubuntu', release: version || '22.04' },
-      debian: { dist: 'debian', release: (version === 'bookworm' ? '12' : version) || '12' },
-      centos: { dist: 'centos', release: version || '9-Stream' },
-      alpine: { dist: 'alpine', release: version || '3.18' },
-      fedora: { dist: 'fedora', release: version || '38' }
-    };
-    return distros[os] || distros.ubuntu;
+  async checkReady() {
+    try {
+      const { stdout } = await execAsync(`${this.cmd} version`);
+      console.log(`✅ LXD Client Version: ${stdout.trim()}`);
+      const { stdout: remoteOut } = await execAsync(`${this.cmd} remote list`);
+      console.log(`[LXD] Available remotes:\n${remoteOut}`);
+      return true;
+    } catch (err) {
+      console.error(`❌ LXD Check Failed: ${err.message}`);
+      if (err.stderr) console.error(`[LXD] Stderr: ${err.stderr}`);
+      return false;
+    }
   }
 
   async startContainer(name) {

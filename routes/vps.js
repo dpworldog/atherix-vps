@@ -94,4 +94,25 @@ router.post('/:id/restart', ensureAuthenticated, async (req, res) => {
   }
 });
 
+// VPS Console
+router.get('/:id/console', ensureAuthenticated, (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const vps = VPS.findOne({ id: parseInt(req.params.id), owner_id: userId });
+    if (!vps) {
+      req.flash('error', 'VPS not found.');
+      return res.redirect('/vps');
+    }
+    res.render('user/console', {
+      title: `Console: ${vps.name} - AtherixCloud`,
+      user: req.user,
+      vps,
+      messages: { error: req.flash('error'), success: req.flash('success') }
+    });
+  } catch (err) {
+    req.flash('error', 'Failed to load console.');
+    res.redirect('/vps');
+  }
+});
+
 module.exports = router;
