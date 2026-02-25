@@ -1,0 +1,17 @@
+<header class="top-header">
+  <div class="flex-center gap-12">
+    <button class="hamburger" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </button>
+    <h1 class="page-title">
+      <%= typeof title !=='undefined' ? title.split(' - ')[0] : ' AtherixCloud' %>
+    </h1>
+  </div>
+  <div class="header-actions">
+    <a href="/dashboard" class="header-btn" title="Dashboard"><i class="fas fa-th-large"></i></a>
+    <a href="/tickets/new" class="header-btn" title="New Ticket"><i class="fas fa-plus"></i></a>
+    <form action="/auth/logout" method="POST" style="display:inline;">
+      <button class="header-btn" type="submit" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+    </form>
+  </div>
+</header>

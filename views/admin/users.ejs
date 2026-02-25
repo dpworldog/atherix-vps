@@ -1,0 +1,59 @@
+<% var activePage='admin-users' ; %>
+  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
+    <div>
+      <h2 style="font-size: 22px; font-weight: 800;">User Management</h2>
+      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Manage all registered users</p>
+    </div>
+    </div>
+
+    <div class="card animate-in">
+      <div class="table-container" style="border: none; background: none;">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>VPS</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${typeof users !== 'undefined' && users.length > 0 ? users.map(u =>
+            '<tr>' +
+              '<td>
+                <div class="flex-center gap-8">
+                  <div class="user-avatar" style="width:32px;height:32px;border-radius:8px;font-size:12px;">' +
+                    (u.username ? u.username.charAt(0).toUpperCase() : '?') + '</div><span style="font-weight:600;">' +
+                    (u.username || 'Unknown') + '</span>
+                </div>
+              </td>' +
+              '<td class="text-secondary">' + (u.email || '') + '</td>' +
+              '<td><span class="mono" style="color:var(--accent);">' + (typeof userVPSCounts !== 'undefined' ?
+                  (userVPSCounts[u.id] || 0) : 0) + '</span></td>' +
+              '<td><span class="badge badge-' + (u.isActive ? 'running' : 'stopped') + '"><span
+                    class="badge-dot"></span>' + (u.isActive ? 'Active' : 'Suspended') + '</span></td>' +
+              '<td class="text-secondary text-sm">' + (u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A')
+                + '</td>' +
+              '<td>
+                <div class="flex-center gap-8"><button class="btn btn-warning btn-sm"
+                    onclick="toggleUser(' + u.id + ',this)"><i
+                      class="fas fa-' + (u.isActive ? 'ban' : 'check') + '"></i></button><button
+                    class="btn btn-danger btn-sm" onclick="deleteUser(' + u.id + ')"><i
+                      class="fas fa-trash"></i></button></div>
+              </td>' +
+              '</tr>'
+            ).join('') : '<tr>
+              <td colspan="6" style="text-align:center; padding:40px;">
+                <div class="empty-state">
+                  <div class="empty-state-icon">👥</div>
+                  <h3>No users registered</h3>
+                </div>
+              </td>
+            </tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    ` }) %>

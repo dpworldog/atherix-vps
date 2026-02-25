@@ -1,0 +1,83 @@
+<% locals.activePage = 'vps'; locals.pageTitle = 'My VPS'; %>
+<%- include('../partials/header') %>
+
+<div class="page-header fade-up">
+  <div>
+    <div class="page-heading">My VPS Instances</div>
+    <div class="page-subheading"><%= vpsList.length %> instance<%= vpsList.length !== 1 ? 's' : '' %> in your account</div>
+  </div>
+  <a href="/vps/create" class="btn btn-primary"><i class="fas fa-plus"></i> Deploy New VPS</a>
+</div>
+
+<% if (vpsList && vpsList.length > 0) { %>
+  <div class="vps-grid">
+    <% vpsList.forEach(function(vps) { %>
+      <div class="vps-card fade-up">
+        <div class="vps-card-header">
+          <div class="vps-name">
+            <span class="vps-os-icon">
+              <% if (vps.os.includes('ubuntu')) { %>🟠<% } else if (vps.os.includes('debian')) { %>🔴<% } else if (vps.os.includes('centos')) { %>🟣<% } else if (vps.os.includes('alpine')) { %>🔵<% } else { %>🖥️<% } %>
+            </span>
+            <%= vps.name %>
+          </div>
+          <span class="badge badge-<%= vps.status %>" data-vps-status="<%= vps._id %>">
+            <span class="badge-dot"></span><%= vps.status %>
+          </span>
+        </div>
+        <div class="vps-card-body">
+          <div class="vps-ip">
+            <i class="fas fa-network-wired"></i>
+            <span><%= vps.network && vps.network.ipv4 ? vps.network.ipv4 : 'Assigning IP...' %></span>
+            <% if (vps.network && vps.network.ipv4) { %>
+              <button class="copy-btn btn-sm" data-value="<%= vps.network.ipv4 %>" style="margin-left: auto; position: static; font-size: 10px; padding: 2px 8px;"><i class="fas fa-copy"></i></button>
+            <% } %>
+          </div>
+          <div class="vps-meta">
+            <div class="vps-meta-item">
+              <div class="vps-meta-label">CPU</div>
+              <div class="vps-meta-value"><%= vps.plan.cpu %> vCore<%= vps.plan.cpu > 1 ? 's' : '' %></div>
+            </div>
+            <div class="vps-meta-item">
+              <div class="vps-meta-label">RAM</div>
+              <div class="vps-meta-value"><%= vps.plan.ram >= 1024 ? (vps.plan.ram/1024).toFixed(1)+'GB' : vps.plan.ram+'MB' %></div>
+            </div>
+            <div class="vps-meta-item">
+              <div class="vps-meta-label">Disk</div>
+              <div class="vps-meta-value"><%= vps.plan.disk %> GB</div>
+            </div>
+            <div class="vps-meta-item">
+              <div class="vps-meta-label">OS</div>
+              <div class="vps-meta-value" style="font-size: 11px;"><%= vps.os %></div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+            <% if (vps.features && vps.features.nesting) { %><span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: var(--cyan-glow); color: var(--cyan); border: 1px solid rgba(0,212,255,0.2);">nesting</span><% } %>
+            <% if (vps.features && vps.features.docker) { %><span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(0,100,200,0.1); color: #4499ff; border: 1px solid rgba(0,100,200,0.2);">docker</span><% } %>
+            <% if (vps.features && vps.features.kvm) { %><span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(153,102,255,0.1); color: var(--purple); border: 1px solid rgba(153,102,255,0.2);">kvm</span><% } %>
+            <% if (vps.features && vps.features.fuse) { %><span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(255,136,0,0.08); color: var(--orange); border: 1px solid rgba(255,136,0,0.2);">fuse</span><% } %>
+          </div>
+        </div>
+        <div class="vps-card-footer">
+          <a href="/vps/<%= vps._id %>" class="btn btn-secondary btn-sm"><i class="fas fa-sliders"></i> Manage</a>
+          <% if (vps.status === 'running') { %>
+            <button class="btn btn-warning btn-sm vps-action-btn" data-vps-id="<%= vps._id %>" data-action="restart"><i class="fas fa-rotate-right"></i> Restart</button>
+            <button class="btn btn-danger btn-sm vps-action-btn" data-vps-id="<%= vps._id %>" data-action="stop"><i class="fas fa-stop"></i> Stop</button>
+          <% } else if (vps.status === 'stopped') { %>
+            <button class="btn btn-success btn-sm vps-action-btn" data-vps-id="<%= vps._id %>" data-action="start"><i class="fas fa-play"></i> Start</button>
+          <% } %>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="fas fa-server"></i></div>
+      <h3>No VPS Deployed Yet</h3>
+      <p>Deploy your first LXC container to start managing your infrastructure</p>
+      <a href="/vps/create" class="btn btn-primary btn-lg"><i class="fas fa-plus"></i> Deploy Your First VPS</a>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

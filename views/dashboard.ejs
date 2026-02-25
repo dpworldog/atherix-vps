@@ -1,0 +1,67 @@
+<% var activePage='dashboard' ; %>
+  <%- include('partials/layout', { body: ` <div class="stats-grid">
+    <div class="stat-card animate-in" style="--stat-color: var(--accent-gradient)">
+      <div class="stat-icon" style="background: var(--accent-dim); color: var(--accent);"><i class="fas fa-server"></i>
+      </div>
+      <div class="stat-value">${typeof stats !== 'undefined' ? (stats.vpsCount || 0) : 0}</div>
+      <div class="stat-label">Total VPS</div>
+    </div>
+    <div class="stat-card animate-in" style="--stat-color: linear-gradient(135deg, #22c55e, #16a34a)">
+      <div class="stat-icon" style="background: var(--green-dim); color: var(--green);"><i
+          class="fas fa-play-circle"></i></div>
+      <div class="stat-value">${typeof stats !== 'undefined' ? (stats.vpsRunning || 0) : 0}</div>
+      <div class="stat-label">Running</div>
+    </div>
+    <div class="stat-card animate-in" style="--stat-color: linear-gradient(135deg, #eab308, #f59e0b)">
+      <div class="stat-icon" style="background: var(--yellow-dim); color: var(--yellow);"><i class="fas fa-headset"></i>
+      </div>
+      <div class="stat-value">${typeof stats !== 'undefined' ? (stats.openTickets || 0) : 0}</div>
+      <div class="stat-label">Open Tickets</div>
+    </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card animate-in">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-server" style="color: var(--accent)"></i> Recent VPS</h3>
+          <a href="/vps" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        ${typeof recentVPS !== 'undefined' && recentVPS.length > 0 ? recentVPS.map(v => '<div class="ticket-item"
+          style="cursor:default;">
+          <div class="ticket-icon" style="background: var(--accent-dim); color: var(--accent);"><i
+              class="fas fa-cube"></i></div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:600; font-size:14px;">' + (v.name || 'Unnamed') + '</div>
+            <div style="font-size:12px; color:var(--text-secondary);">' + (v.os || 'ubuntu') + ' • ' + (v.cpu || 1) + '
+              vCPU • ' + (v.ram || 512) + 'MB</div>
+          </div><span class="badge badge-' + (v.status || 'creating') + '"><span class="badge-dot"></span>' + (v.status
+            || 'creating') + '</span>
+        </div>').join(''): '<div class="empty-state">
+          <div class="empty-state-icon">🖥️</div>
+          <h3>No VPS instances yet</h3>
+          <p>Your virtual servers will appear here</p>
+        </div>'}
+      </div>
+
+      <div class="card animate-in">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-headset" style="color: var(--yellow)"></i> Recent Tickets</h3>
+          <a href="/tickets" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        ${typeof recentTickets !== 'undefined' && recentTickets.length > 0 ? recentTickets.map(t => '<a
+          class="ticket-item" href="/tickets/' + (t._id || t.id) + '">
+          <div class="ticket-icon" style="background: var(--yellow-dim); color: var(--yellow);"><i
+              class="fas fa-envelope"></i></div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:600; font-size:14px;">' + (t.title || 'Untitled') + '</div>
+            <div style="font-size:12px; color:var(--text-secondary);">' + (t.priority || 'medium') + ' priority</div>
+          </div><span class="badge badge-' + (t.status || 'open') + '">' + (t.status || 'open') + '</span>
+        </a>').join('') : '<div class="empty-state">
+          <div class="empty-state-icon">💬</div>
+          <h3>No tickets yet</h3>
+          <p>Need help? Create a support ticket</p><a href="/tickets/new" class="btn btn-primary btn-sm"><i
+              class="fas fa-plus"></i> New Ticket</a>
+        </div>'}
+      </div>
+    </div>
+    ` }) %>

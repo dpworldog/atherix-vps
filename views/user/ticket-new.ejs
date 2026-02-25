@@ -1,0 +1,45 @@
+<% var activePage='tickets' ; %>
+  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
+    <div>
+      <h2 style="font-size: 22px; font-weight: 800;">New Support Ticket</h2>
+      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Describe your issue and we'll respond quickly
+      </p>
+    </div>
+    <a href="/tickets" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
+    <div class="card animate-in">
+      <form action="/tickets/new" method="POST">
+        <div class="form-group">
+          <label class="form-label">Ticket Title</label>
+          <input type="text" name="title" class="form-control" placeholder="Brief description of your issue" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select">
+              <option value="general">General</option>
+              <option value="technical">Technical Support</option>
+              <option value="billing">Billing</option>
+              <option value="abuse">Abuse Report</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-select">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea name="message" class="form-control" rows="6" placeholder="Describe your issue in detail..." required
+            style="resize: vertical; min-height: 120px;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane"></i> Submit Ticket</button>
+      </form>
+    </div>
+    ` }) %>

@@ -1,0 +1,73 @@
+<% var activePage='admin-dashboard' ; %>
+  <%- include('../partials/layout', { body: ` <div class="mb-24">
+    <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">Admin Dashboard</h2>
+    <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">System overview and management</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card animate-in" style="--stat-color: var(--accent-gradient)">
+        <div class="stat-icon" style="background: var(--accent-dim); color: var(--accent);"><i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">${typeof stats !== 'undefined' ? (stats.totalUsers || 0) : 0}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card animate-in" style="--stat-color: linear-gradient(135deg, var(--purple), #7c3aed)">
+        <div class="stat-icon" style="background: var(--purple-dim); color: var(--purple);"><i
+            class="fas fa-server"></i></div>
+        <div class="stat-value">${typeof stats !== 'undefined' ? (stats.totalVPS || 0) : 0}</div>
+        <div class="stat-label">Total VPS</div>
+      </div>
+      <div class="stat-card animate-in" style="--stat-color: linear-gradient(135deg, #22c55e, #16a34a)">
+        <div class="stat-icon" style="background: var(--green-dim); color: var(--green);"><i
+            class="fas fa-play-circle"></i></div>
+        <div class="stat-value">${typeof stats !== 'undefined' ? (stats.runningVPS || 0) : 0}</div>
+        <div class="stat-label">Running VPS</div>
+      </div>
+      <div class="stat-card animate-in" style="--stat-color: linear-gradient(135deg, var(--orange), #ea580c)">
+        <div class="stat-icon" style="background: var(--orange-dim); color: var(--orange);"><i
+            class="fas fa-headset"></i></div>
+        <div class="stat-value">${typeof stats !== 'undefined' ? (stats.openTickets || 0) : 0}</div>
+        <div class="stat-label">Open Tickets</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card animate-in">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-user-plus" style="color: var(--accent)"></i> Recent Users</h3>
+          <a href="/admin/users" class="btn btn-secondary btn-sm">All Users</a>
+        </div>
+        ${typeof recentUsers !== 'undefined' && recentUsers.length > 0 ? recentUsers.map(u => '<div class="ticket-item"
+          style="cursor:default;">
+          <div class="ticket-icon" style="background: var(--accent-dim); color: var(--accent);"><i
+              class="fas fa-user"></i></div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:600; font-size:14px;">' + (u.username || 'Unknown') + '</div>
+            <div style="font-size:12px; color:var(--text-secondary);">' + (u.email || '') + '</div>
+          </div><span class="badge badge-' + (u.isActive ? 'running' : 'stopped') + '">' + (u.isActive ? 'Active' :
+            'Suspended') + '</span>
+        </div>').join('') : '<div class="empty-state">
+          <p class="text-secondary">No users yet</p>
+        </div>'}
+      </div>
+
+      <div class="card animate-in">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-ticket-alt" style="color: var(--orange)"></i> Recent Tickets</h3>
+          <a href="/admin/tickets" class="btn btn-secondary btn-sm">All Tickets</a>
+        </div>
+        ${typeof recentTickets !== 'undefined' && recentTickets.length > 0 ? recentTickets.map(t => '<a
+          class="ticket-item" href="/admin/tickets/' + (t._id || t.id) + '">
+          <div class="ticket-icon" style="background: var(--orange-dim); color: var(--orange);"><i
+              class="fas fa-envelope"></i></div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:600; font-size:14px;">' + (t.title || 'Untitled') + '</div>
+            <div style="font-size:12px; color:var(--text-secondary);">by ' + (t.user && t.user.username ?
+              t.user.username : 'Unknown') + '</div>
+          </div><span class="badge badge-' + (t.status || 'open') + '">' + (t.status || 'open') + '</span>
+        </a>').join('') : '<div class="empty-state">
+          <p class="text-secondary">No tickets</p>
+        </div>'}
+      </div>
+    </div>
+    ` }) %>

@@ -1,0 +1,53 @@
+<% locals.activePage = 'tickets'; locals.pageTitle = 'Support Tickets'; %>
+<%- include('../partials/header') %>
+
+<div class="page-header fade-up">
+  <div>
+    <div class="page-heading">Support Tickets</div>
+    <div class="page-subheading"><%= tickets.length %> ticket<%= tickets.length !== 1 ? 's' : '' %> in your account</div>
+  </div>
+  <a href="/tickets/new" class="btn btn-primary"><i class="fas fa-plus"></i> New Ticket</a>
+</div>
+
+<% if (tickets && tickets.length > 0) { %>
+  <div class="card fade-up">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Ticket ID</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Updated</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% tickets.forEach(function(ticket) { %>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan);"><%= ticket.ticketId %></td>
+              <td>
+                <a href="/tickets/<%= ticket._id %>" style="color: var(--text-primary); font-weight: 600; text-decoration: none;"><%= ticket.subject %></a>
+              </td>
+              <td style="font-size: 12px; color: var(--text-muted); text-transform: capitalize;"><%= ticket.category %></td>
+              <td>
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: <%= ticket.priority === 'urgent' ? 'var(--red)' : ticket.priority === 'high' ? 'var(--orange)' : ticket.priority === 'medium' ? 'var(--yellow)' : 'var(--green)' %>;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: currentColor;"></span>
+                  <%= ticket.priority %>
+                </span>
+              </td>
+              <td><span class="badge badge-<%= ticket.status %>"><%= ticket.status.replace('_',' ') %></span></td>
+              <td style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);"><%= new Date(ticket.updatedAt).toLocaleDateString() %></td>
+              <td><a href="/tickets/<%= ticket._id %>" class="btn btn-secondary btn-sm">View</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% } else { %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="fas fa-headset"></i></div>
+      <h3>No Support Tickets</h3>
+      <p>Having trouble? Open a support ticket and our team will help you.</p>
+      <a href="/tickets/new" class="btn btn-primary btn-lg"><i class="fas fa-plus"></i> Open First Ticket</a>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

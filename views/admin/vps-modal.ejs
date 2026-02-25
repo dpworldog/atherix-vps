@@ -1,0 +1,94 @@
+<!-- Create VPS Modal -->
+<div class="modal-overlay" id="createVPSModal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title">🖥️ Create New VPS (LXC Container)</div>
+      <button class="modal-close" onclick="closeModal('createVPSModal')">✕</button>
+    </div>
+    <form onsubmit="submitCreateVPS(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">VPS Name</label>
+          <input type="text" name="name" class="form-control" placeholder="my-server" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hostname</label>
+          <input type="text" name="hostname" class="form-control" placeholder="server.example.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assign to User</label>
+        <select name="ownerId" class="form-select" required id="modalUserSelect">
+          <option value="">Select a user...</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Operating System</label>
+          <select name="os" class="form-select">
+            <option value="ubuntu">Ubuntu</option>
+            <option value="debian">Debian</option>
+            <option value="centos">CentOS</option>
+            <option value="alpine">Alpine</option>
+            <option value="fedora">Fedora</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">OS Version</label>
+          <input type="text" name="osVersion" class="form-control" placeholder="22.04">
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">CPU Cores</label>
+          <input type="number" name="cpu" class="form-control" min="1" max="32" value="1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">RAM (MB)</label>
+          <input type="number" name="ram" class="form-control" min="128" max="32768" value="512" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Disk (GB)</label>
+          <input type="number" name="disk" class="form-control" min="5" max="500" value="10" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Root Password</label>
+        <input type="text" name="rootPassword" class="form-control" placeholder="Leave empty for auto-generate">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">LXC Features</label>
+        <div class="checkbox-group">
+          <div class="checkbox-item checked">
+            <input type="checkbox" name="nesting" checked>
+            <label>🔁 Nesting</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="kvm">
+            <label>⚡ KVM</label>
+          </div>
+          <div class="checkbox-item checked">
+            <input type="checkbox" name="fuse" checked>
+            <label>📁 FUSE</label>
+          </div>
+          <div class="checkbox-item checked">
+            <input type="checkbox" name="docker" checked>
+            <label>🐳 Docker</label>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--text-secondary);margin-top:8px">⚠️ KVM requires host kernel support. Docker requires nesting+unconfined AppArmor.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Admin Notes (visible to user)</label>
+        <textarea name="notes" class="form-control" rows="2" placeholder="Any notes for the user..."></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px">
+        <button type="submit" class="btn btn-primary">🚀 Create VPS Container</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('createVPSModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

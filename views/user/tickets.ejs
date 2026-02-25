@@ -1,0 +1,30 @@
+<% var activePage='tickets' ; %>
+  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
+    <div>
+      <h2 style="font-size: 22px; font-weight: 800;">Support Tickets</h2>
+      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Get help from our support team</p>
+    </div>
+    <a href="/tickets/new" class="btn btn-primary"><i class="fas fa-plus"></i> New Ticket</a>
+    </div>
+
+    ${typeof tickets !== 'undefined' && tickets.length > 0 ? tickets.map(t => '<a class="ticket-item animate-in"
+      href="/tickets/' + (t._id || t.id) + '">
+      <div class="ticket-icon"
+        style="background: ' + (t.status === 'open' ? 'var(--accent-dim)' : t.status === 'in-progress' ? 'var(--orange-dim)' : t.status === 'resolved' ? 'var(--green-dim)' : 'rgba(100,100,120,0.1)') + '; color: ' + (t.status === 'open' ? 'var(--accent)' : t.status === 'in-progress' ? 'var(--orange)' : t.status === 'resolved' ? 'var(--green)' : '#888') + ';">
+        <i class="fas fa-ticket-alt"></i></div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:600; font-size:14px;">' + (t.title || 'Untitled') + '</div>
+        <div style="font-size:12px; color:var(--text-secondary);"><span
+            class="badge badge-' + (t.priority || 'medium') + '" style="margin-right:6px;">' + (t.priority || 'medium')
+            + '</span>' + ((t.messages || []).length) + ' messages</div>
+      </div><span class="badge badge-' + (t.status || 'open') + '">' + (t.status || 'open') + '</span><i
+        class="fas fa-chevron-right" style="color:var(--text-dim); font-size:12px;"></i>
+    </a>').join('') : '<div class="card">
+      <div class="empty-state">
+        <div class="empty-state-icon">💬</div>
+        <h3>No tickets yet</h3>
+        <p>Need assistance? Create a support ticket and we\\'ll help you out.</p><a href="/tickets/new"
+          class="btn btn-primary"><i class="fas fa-plus"></i> Create Ticket</a>
+      </div>
+    </div>'}
+    ` }) %>

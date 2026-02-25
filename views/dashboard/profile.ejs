@@ -1,0 +1,90 @@
+<% locals.activePage = 'profile'; locals.pageTitle = 'Profile Settings'; %>
+<%- include('../partials/header') %>
+
+<div class="page-header fade-up">
+  <div>
+    <div class="page-heading">Profile Settings</div>
+    <div class="page-subheading">Manage your account details and security</div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+  <div class="card fade-up">
+    <div class="card-header"><div class="card-title"><i class="fas fa-user"></i> Account Info</div></div>
+    <div class="card-body">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, var(--cyan), var(--blue)); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: var(--bg-void); margin: 0 auto 12px; box-shadow: 0 0 20px var(--cyan-glow);">
+          <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+        <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);"><%= user.name %></div>
+        <div style="font-size: 13px; color: var(--text-muted);"><%= user.email %></div>
+        <span class="badge badge-<%= user.role %>" style="margin-top: 8px;"><%= user.role %></span>
+      </div>
+      <form action="/dashboard/profile" method="POST">
+        <div class="form-group">
+          <label class="form-label">Display Name</label>
+          <input type="text" name="name" class="form-control" value="<%= user.name %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" value="<%= user.email %>" disabled style="opacity: 0.6; cursor: not-allowed;">
+          <div class="form-hint">Email cannot be changed</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notifications</label>
+          <label class="toggle-group">
+            <input type="checkbox" name="notifications" <%= user.notifications ? 'checked' : '' %>>
+            <div class="toggle-switch"></div>
+            <div class="toggle-label"><strong>Email Notifications</strong>Get updates on tickets and VPS status</div>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="card fade-up">
+      <div class="card-header"><div class="card-title"><i class="fas fa-key"></i> Change Password</div></div>
+      <div class="card-body">
+        <form action="/dashboard/profile/password" method="POST">
+          <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <input type="password" name="currentPassword" class="form-control" placeholder="••••••••" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input type="password" name="newPassword" class="form-control" placeholder="Min. 6 characters" required minlength="6">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" name="confirmPassword" class="form-control" placeholder="Repeat new password" required>
+          </div>
+          <button type="submit" class="btn btn-warning"><i class="fas fa-lock"></i> Update Password</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card fade-up">
+      <div class="card-header"><div class="card-title"><i class="fas fa-info-circle"></i> Account Details</div></div>
+      <div class="card-body">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
+            <span style="font-size: 13px; color: var(--text-muted);">Member Since</span>
+            <span style="font-size: 13px; color: var(--text-primary); font-family: var(--font-mono);"><%= new Date(user.createdAt).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'}) %></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
+            <span style="font-size: 13px; color: var(--text-muted);">Last Login</span>
+            <span style="font-size: 13px; color: var(--text-primary); font-family: var(--font-mono);"><%= user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'N/A' %></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+            <span style="font-size: 13px; color: var(--text-muted);">Account Status</span>
+            <span class="badge badge-running">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

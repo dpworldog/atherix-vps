@@ -1,0 +1,167 @@
+<% locals.activePage = 'create-vps'; locals.pageTitle = 'Deploy VPS'; %>
+<%- include('../partials/header') %>
+
+<div class="page-header fade-up">
+  <div>
+    <div class="page-heading">Deploy New VPS</div>
+    <div class="page-subheading">Provision an LXC container with custom specs and features</div>
+  </div>
+  <a href="/vps" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+</div>
+
+<form action="/vps/create" method="POST">
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+      <!-- Basic Info -->
+      <div class="card fade-up">
+        <div class="card-header"><div class="card-title"><i class="fas fa-tag"></i> Basic Configuration</div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">VPS Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. my-web-server" required pattern="[a-zA-Z0-9 \-_]+" minlength="3" maxlength="40">
+            <div class="form-hint">Alphanumeric, spaces, hyphens and underscores allowed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OS Selection -->
+      <div class="card fade-up">
+        <div class="card-header"><div class="card-title"><i class="fas fa-compact-disc"></i> Operating System</div></div>
+        <div class="card-body">
+          <div class="os-grid">
+            <% OS_TEMPLATES.forEach(function(os, i) { %>
+              <label class="os-card <%= i === 0 ? 'selected' : '' %>">
+                <input type="radio" name="os" value="<%= os.value %>" <%= i === 0 ? 'checked' : '' %>>
+                <div class="os-icon"><%= os.icon %></div>
+                <div class="os-name"><%= os.label %></div>
+              </label>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan Selection -->
+      <div class="card fade-up">
+        <div class="card-header"><div class="card-title"><i class="fas fa-cubes"></i> Resource Plan</div></div>
+        <div class="card-body">
+          <div class="plan-grid">
+            <% PLANS.forEach(function(plan, i) { %>
+              <label class="plan-card <%= i === 0 ? 'selected' : '' %>">
+                <input type="radio" name="plan" value="<%= plan.name %>" <%= i === 0 ? 'checked' : '' %>>
+                <div class="plan-name"><%= plan.name %></div>
+                <div class="plan-spec"><i class="fas fa-microchip"></i> <%= plan.cpu %> vCPU</div>
+                <div class="plan-spec"><i class="fas fa-memory"></i> <%= plan.ram >= 1024 ? (plan.ram/1024)+'GB' : plan.ram+'MB' %> RAM</div>
+                <div class="plan-spec"><i class="fas fa-hdd"></i> <%= plan.disk %>GB NVMe</div>
+                <div class="plan-spec"><i class="fas fa-wifi"></i> <%= plan.bandwidth %>GB BW</div>
+                <div class="plan-price"><%= plan.price %></div>
+              </label>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="card fade-up">
+        <div class="card-header"><div class="card-title"><i class="fas fa-cogs"></i> Container Features</div></div>
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <label class="toggle-group">
+              <input type="checkbox" name="nesting" checked>
+              <div class="toggle-switch"></div>
+              <div class="toggle-label"><strong>LXC Nesting</strong>Run containers inside containers</div>
+            </label>
+            <label class="toggle-group">
+              <input type="checkbox" name="docker" checked>
+              <div class="toggle-switch"></div>
+              <div class="toggle-label"><strong>Docker Support</strong>Run Docker inside LXC</div>
+            </label>
+            <label class="toggle-group">
+              <input type="checkbox" name="kvm" checked>
+              <div class="toggle-switch"></div>
+              <div class="toggle-label"><strong>KVM Support</strong>Enable KVM virtualization</div>
+            </label>
+            <label class="toggle-group">
+              <input type="checkbox" name="fuse" checked>
+              <div class="toggle-switch"></div>
+              <div class="toggle-label"><strong>FUSE Support</strong>Filesystem in userspace</div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right sidebar summary -->
+    <div>
+      <div class="card fade-up" style="position: sticky; top: 80px;">
+        <div class="card-header"><div class="card-title"><i class="fas fa-receipt"></i> Deployment Summary</div></div>
+        <div class="card-body">
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+              <span style="color: var(--text-muted);">Plan</span>
+              <span id="summaryPlan" style="color: var(--text-primary); font-weight: 600;">Starter</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+              <span style="color: var(--text-muted);">CPU</span>
+              <span id="summaryCpu" style="color: var(--cyan); font-family: var(--font-mono);">1 vCore</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+              <span style="color: var(--text-muted);">RAM</span>
+              <span id="summaryRam" style="color: var(--cyan); font-family: var(--font-mono);">512MB</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+              <span style="color: var(--text-muted);">Disk</span>
+              <span id="summaryDisk" style="color: var(--cyan); font-family: var(--font-mono);">10GB</span>
+            </div>
+          </div>
+
+          <div style="background: var(--cyan-glow); border: 1px solid rgba(0,212,255,0.2); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 12px; color: var(--text-secondary);">
+            <i class="fas fa-info-circle" style="color: var(--cyan); margin-right: 6px;"></i>
+            Root password will be auto-generated and shown after deployment.
+          </div>
+
+          <div style="background: rgba(0,255,136,0.04); border: 1px solid rgba(0,255,136,0.15); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono); margin-bottom: 6px;">LXC Config Includes</div>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 4px;">
+              <li style="font-size: 12px; color: var(--green);"><i class="fas fa-check" style="margin-right: 6px;"></i>cgroup v1/v2 support</li>
+              <li style="font-size: 12px; color: var(--green);"><i class="fas fa-check" style="margin-right: 6px;"></i>Auto-start on boot</li>
+              <li style="font-size: 12px; color: var(--green);"><i class="fas fa-check" style="margin-right: 6px;"></i>Bridged networking</li>
+              <li style="font-size: 12px; color: var(--green);"><i class="fas fa-check" style="margin-right: 6px;"></i>Isolated environment</li>
+            </ul>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px;">
+            <i class="fas fa-rocket"></i> Deploy VPS Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+const planData = {
+  'Starter': { cpu: '1 vCore', ram: '512MB', disk: '10GB' },
+  'Basic': { cpu: '1 vCore', ram: '1GB', disk: '25GB' },
+  'Pro': { cpu: '2 vCores', ram: '2GB', disk: '50GB' },
+  'Advanced': { cpu: '4 vCores', ram: '4GB', disk: '100GB' },
+  'Enterprise': { cpu: '8 vCores', ram: '8GB', disk: '200GB' }
+};
+
+document.querySelectorAll('.plan-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const radio = card.querySelector('input[type="radio"]');
+    if (radio) {
+      const plan = planData[radio.value];
+      if (plan) {
+        document.getElementById('summaryPlan').textContent = radio.value;
+        document.getElementById('summaryCpu').textContent = plan.cpu;
+        document.getElementById('summaryRam').textContent = plan.ram;
+        document.getElementById('summaryDisk').textContent = plan.disk;
+      }
+    }
+  });
+});
+</script>
+
+<%- include('../partials/footer') %>

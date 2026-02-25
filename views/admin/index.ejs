@@ -1,0 +1,131 @@
+<% locals.activePage = 'admin'; locals.pageTitle = 'Admin Panel'; %>
+<%- include('../partials/header') %>
+
+<div class="page-header fade-up">
+  <div>
+    <div class="page-heading" style="color: var(--purple);">⭐ Admin Control Panel</div>
+    <div class="page-subheading">Full platform management and oversight</div>
+  </div>
+</div>
+
+<div class="admin-tabs">
+  <a href="/admin" class="admin-tab active">Overview</a>
+  <a href="/admin/users" class="admin-tab">Users</a>
+  <a href="/admin/vps" class="admin-tab">VPS Management</a>
+  <a href="/admin/tickets" class="admin-tab">Tickets</a>
+</div>
+
+<div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="stat-card" style="--accent-color: var(--cyan); --icon-bg: var(--cyan-glow); --icon-color: var(--cyan); --icon-border: rgba(0,212,255,0.2);">
+    <div class="stat-icon"><i class="fas fa-users"></i></div>
+    <div class="stat-value"><%= stats.totalUsers %></div>
+    <div class="stat-label">Total Users</div>
+  </div>
+  <div class="stat-card" style="--accent-color: var(--green); --icon-bg: var(--green-bg); --icon-color: var(--green); --icon-border: rgba(0,255,136,0.2);">
+    <div class="stat-icon"><i class="fas fa-server"></i></div>
+    <div class="stat-value"><%= stats.totalVPS %></div>
+    <div class="stat-label">Total VPS</div>
+  </div>
+  <div class="stat-card" style="--accent-color: var(--yellow); --icon-bg: var(--yellow-bg); --icon-color: var(--yellow); --icon-border: rgba(255,204,0,0.2);">
+    <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
+    <div class="stat-value"><%= stats.openTickets %></div>
+    <div class="stat-label">Open Tickets</div>
+  </div>
+  <div class="stat-card" style="--accent-color: var(--red); --icon-bg: var(--red-bg); --icon-color: var(--red); --icon-border: rgba(255,51,102,0.2);">
+    <div class="stat-icon"><i class="fas fa-ban"></i></div>
+    <div class="stat-value"><%= stats.bannedUsers %></div>
+    <div class="stat-label">Banned Users</div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+  <!-- Recent Users -->
+  <div class="card fade-up">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-users"></i> Recent Users</div>
+      <a href="/admin/users" class="btn btn-secondary btn-sm">Manage All</a>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Joined</th></tr></thead>
+        <tbody>
+          <% users.slice(0,6).forEach(function(u) { %>
+            <tr>
+              <td style="font-weight: 600; color: var(--text-primary);"><%= u.name %></td>
+              <td style="font-size: 12px; font-family: var(--font-mono); color: var(--text-muted);"><%= u.email %></td>
+              <td>
+                <% if (u.isBanned) { %><span class="badge badge-banned">Banned</span>
+                <% } else { %><span class="badge badge-active">Active</span><% } %>
+              </td>
+              <td style="font-size: 11px; color: var(--text-muted);"><%= new Date(u.createdAt).toLocaleDateString() %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Open Tickets -->
+  <div class="card fade-up">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-ticket-alt"></i> Open Tickets</div>
+      <a href="/admin/tickets" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <% const openTickets = tickets.filter(t => t.status === 'open' || t.status === 'in_progress'); %>
+    <% if (openTickets.length > 0) { %>
+      <% openTickets.slice(0,5).forEach(function(ticket) { %>
+        <a href="/admin/tickets/<%= ticket._id %>" class="ticket-item">
+          <div class="ticket-priority priority-<%= ticket.priority %>"></div>
+          <div class="ticket-info">
+            <div class="ticket-id"><%= ticket.ticketId %> · <%= ticket.owner ? ticket.owner.name : 'Unknown' %></div>
+            <div class="ticket-subject" style="font-size: 13px;"><%= ticket.subject %></div>
+          </div>
+          <span class="badge badge-<%= ticket.status %>" style="font-size: 9px;"><%= ticket.status.replace('_',' ') %></span>
+        </a>
+      <% }); %>
+    <% } else { %>
+      <div class="empty-state" style="padding: 30px;"><div class="empty-state-icon" style="font-size: 28px;"><i class="fas fa-check-circle"></i></div><h3 style="font-size: 14px; color: var(--green);">All caught up!</h3></div>
+    <% } %>
+  </div>
+
+  <!-- All VPS -->
+  <div class="card fade-up" style="grid-column: span 2;">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-server"></i> Platform VPS Instances</div>
+      <div style="display: flex; gap: 8px;">
+        <a href="/admin/vps/create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create VPS</a>
+        <a href="/admin/vps" class="btn btn-secondary btn-sm">View All</a>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Name</th><th>Owner</th><th>IP</th><th>Status</th><th>Plan</th><th>Actions</th></tr></thead>
+        <tbody>
+          <% vpsList.slice(0,8).forEach(function(vps) { %>
+            <tr>
+              <td style="font-weight: 600; color: var(--text-primary);"><%= vps.name %><div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);"><%= vps.hostname %></div></td>
+              <td style="font-size: 12px; color: var(--text-secondary);"><%= vps.owner ? vps.owner.name : 'Unknown' %></td>
+              <td style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan);"><%= vps.network && vps.network.ipv4 ? vps.network.ipv4 : '—' %></td>
+              <td><span class="badge badge-<%= vps.status %>"><span class="badge-dot"></span><%= vps.status %></span></td>
+              <td style="font-size: 12px; color: var(--text-muted);"><%= vps.plan.cpu %>vCPU · <%= vps.plan.ram %>MB</td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <% if (vps.status === 'running') { %>
+                    <button class="btn btn-warning btn-sm admin-vps-action-btn" data-vps-id="<%= vps._id %>" data-action="stop"><i class="fas fa-stop"></i></button>
+                  <% } else { %>
+                    <button class="btn btn-success btn-sm admin-vps-action-btn" data-vps-id="<%= vps._id %>" data-action="start"><i class="fas fa-play"></i></button>
+                  <% } %>
+                  <form action="/admin/vps/<%= vps._id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete <%= vps.name %>?')">
+                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,102 @@
+<% locals.activePage = 'tickets'; locals.pageTitle = ticket.ticketId; %>
+<%- include('../partials/header') %>
+
+<div class="page-header fade-up">
+  <div style="display: flex; align-items: center; gap: 14px;">
+    <a href="/tickets" style="color: var(--text-muted); text-decoration: none; font-size: 20px;"><i class="fas fa-arrow-left"></i></a>
+    <div>
+      <div class="page-heading"><%= ticket.subject %></div>
+      <div class="page-subheading" style="font-family: var(--font-mono);">
+        <%= ticket.ticketId %> · <%= ticket.category %> · <span style="color: <%= ticket.priority === 'urgent' ? 'var(--red)' : ticket.priority === 'high' ? 'var(--orange)' : ticket.priority === 'medium' ? 'var(--yellow)' : 'var(--green)' %>;">● <%= ticket.priority %></span>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <span class="badge badge-<%= ticket.status %>"><%= ticket.status.replace('_',' ') %></span>
+    <% if (ticket.status !== 'closed') { %>
+      <form action="/tickets/<%= ticket._id %>/close" method="POST" style="display: inline;" onsubmit="return confirm('Close this ticket?')">
+        <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-lock"></i> Close Ticket</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+  <div>
+    <!-- Messages -->
+    <div class="card fade-up" style="margin-bottom: 20px;">
+      <div class="card-header"><div class="card-title"><i class="fas fa-comments"></i> Conversation (<%= ticket.messages.length %> messages)</div></div>
+      <div class="card-body">
+        <div class="message-thread">
+          <% ticket.messages.forEach(function(msg) { %>
+            <div class="message-bubble <%= msg.isAdmin ? 'admin' : '' %>">
+              <div class="message-avatar <%= msg.isAdmin ? 'admin-av' : 'user-av' %>">
+                <%= msg.author ? msg.author.name.charAt(0).toUpperCase() : '?' %>
+              </div>
+              <div class="message-content">
+                <div class="message-meta">
+                  <%= msg.author ? msg.author.name : 'Unknown' %>
+                  <% if (msg.isAdmin) { %> <span style="color: var(--purple); font-size: 10px;">· SUPPORT TEAM</span><% } %>
+                  · <%= new Date(msg.createdAt).toLocaleString() %>
+                </div>
+                <div class="message-text"><%= msg.content %></div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reply -->
+    <% if (ticket.status !== 'closed') { %>
+      <div class="card fade-up">
+        <div class="card-header"><div class="card-title"><i class="fas fa-reply"></i> Reply</div></div>
+        <div class="card-body">
+          <form action="/tickets/<%= ticket._id %>/reply" method="POST">
+            <div class="form-group">
+              <textarea name="message" class="form-control" rows="4" placeholder="Type your reply..." required minlength="5"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send Reply</button>
+          </form>
+        </div>
+      </div>
+    <% } else { %>
+      <div style="text-align: center; padding: 20px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 10px;">
+        <i class="fas fa-lock" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+        This ticket is closed. <a href="/tickets/new" style="color: var(--cyan);">Open a new ticket</a> if you need further assistance.
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Info panel -->
+  <div>
+    <div class="card fade-up">
+      <div class="card-header"><div class="card-title"><i class="fas fa-info-circle"></i> Ticket Details</div></div>
+      <div class="card-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <% [
+            {label: 'Ticket ID', value: ticket.ticketId},
+            {label: 'Status', value: ticket.status.replace('_',' ')},
+            {label: 'Priority', value: ticket.priority},
+            {label: 'Category', value: ticket.category},
+            {label: 'Created', value: new Date(ticket.createdAt).toLocaleString()},
+            {label: 'Updated', value: new Date(ticket.updatedAt).toLocaleString()},
+          ].forEach(function(item) { %>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); font-size: 13px;">
+              <span style="color: var(--text-muted);"><%= item.label %></span>
+              <span style="color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; text-transform: capitalize;"><%= item.value %></span>
+            </div>
+          <% }); %>
+          <% if (ticket.relatedVps) { %>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); font-size: 13px;">
+              <span style="color: var(--text-muted);">Related VPS</span>
+              <a href="/vps/<%= ticket.relatedVps._id %>" style="color: var(--cyan); font-size: 12px; font-family: var(--font-mono);"><%= ticket.relatedVps.name %></a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

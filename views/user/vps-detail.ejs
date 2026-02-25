@@ -1,0 +1,78 @@
+<% var activePage='vps' ; %>
+  <%- include('../partials/layout', { body: ` <a href="/vps" class="btn btn-secondary btn-sm mb-24"><i
+      class="fas fa-arrow-left"></i> Back to VPS</a>
+
+    <div class="card animate-in">
+      <div class="card-header">
+        <div>
+          <h2 style="font-size: 22px; font-weight: 800;">${typeof vps !== 'undefined' ? vps.name : 'VPS Details'}</h2>
+          <p class="text-secondary" style="margin-top: 4px; font-size: 13px;"><i class="fab fa-linux"></i> ${typeof vps
+            !== 'undefined' ? (vps.os || 'ubuntu') + ' ' + (vps.osVersion || '22.04') : ''}</p>
+        </div>
+        <span class="badge badge-${typeof vps !== 'undefined' ? (vps.status || 'creating') : 'creating'}"><span
+            class="badge-dot"></span>${typeof vps !== 'undefined' ? (vps.status || 'creating') : 'creating'}</span>
+      </div>
+
+      <div class="vps-specs" style="margin: 20px 0;">
+        <div class="vps-spec">
+          <div class="vps-spec-value">${typeof vps !== 'undefined' ? (vps.cpu || 1) : 1}</div>
+          <div class="vps-spec-label">vCPU</div>
+        </div>
+        <div class="vps-spec">
+          <div class="vps-spec-value">${typeof vps !== 'undefined' ? (vps.ram || 512) : 512}</div>
+          <div class="vps-spec-label">MB RAM</div>
+        </div>
+        <div class="vps-spec">
+          <div class="vps-spec-value">${typeof vps !== 'undefined' ? (vps.disk || 10) : 10}</div>
+          <div class="vps-spec-label">GB Disk</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label class="form-label">IP Address</label>
+            <div class="vps-ip"><i class="fas fa-network-wired"></i> ${typeof vps !== 'undefined' && vps.ipAddress ?
+              vps.ipAddress : 'Pending'}</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Container ID</label>
+            <div class="vps-ip mono"><i class="fas fa-fingerprint"></i> ${typeof vps !== 'undefined' ? (vps.containerId
+              || 'N/A') : 'N/A'}</div>
+          </div>
+          ${typeof vps !== 'undefined' && vps.rootPassword ? '<div class="form-group"><label class="form-label">Root
+              Password</label>
+            <div class="vps-ip mono">••••••••</div>
+          </div>' : ''}
+        </div>
+        <div>
+          <div class="form-group">
+            <label class="form-label">Features</label>
+            <div class="feature-tags">
+              ${typeof vps !== 'undefined' && vps.features ? (vps.features.nesting ? '<span
+                class="feature-tag">Nesting</span>' : '') + (vps.features.kvm ? '<span class="feature-tag">KVM</span>' :
+              '') + (vps.features.fuse ? '<span class="feature-tag">FUSE</span>' : '') + (vps.features.docker ? '<span
+                class="feature-tag">Docker</span>' : '') : ''}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Created</label>
+            <div style="font-size: 13px; color: var(--text-secondary);">${typeof vps !== 'undefined' && vps.createdAt ?
+              new Date(vps.createdAt).toLocaleString() : 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vps-actions" style="margin-top: 20px;">
+        <button class="btn btn-success"
+          onclick="vpsAction(${typeof vps !== 'undefined' ? (vps._id || vps.id) : 0}, 'start')"><i
+            class="fas fa-play"></i> Start</button>
+        <button class="btn btn-warning"
+          onclick="vpsAction(${typeof vps !== 'undefined' ? (vps._id || vps.id) : 0}, 'stop')"><i
+            class="fas fa-stop"></i> Stop</button>
+        <button class="btn btn-secondary"
+          onclick="vpsAction(${typeof vps !== 'undefined' ? (vps._id || vps.id) : 0}, 'restart')"><i
+            class="fas fa-redo"></i> Restart</button>
+      </div>
+    </div>
+    ` }) %>

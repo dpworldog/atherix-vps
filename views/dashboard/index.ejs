@@ -1,0 +1,114 @@
+<% locals.activePage = 'dashboard'; locals.pageTitle = 'Dashboard'; %>
+<%- include('../partials/header') %>
+
+<div class="page-header fade-up">
+  <div>
+    <div class="page-heading">Dashboard</div>
+    <div class="page-subheading">Welcome back, <%= user.name %> — here's your infrastructure overview</div>
+  </div>
+  <a href="/vps/create" class="btn btn-primary"><i class="fas fa-plus"></i> Deploy VPS</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card fade-up fade-up-1" style="--accent-color: var(--cyan); --icon-bg: var(--cyan-glow); --icon-color: var(--cyan); --icon-border: rgba(0,212,255,0.2);">
+    <div class="stat-icon"><i class="fas fa-server"></i></div>
+    <div class="stat-value" data-count="<%= stats.totalVPS || 0 %>"><%= stats.totalVPS || 0 %></div>
+    <div class="stat-label">Total VPS</div>
+  </div>
+  <div class="stat-card fade-up fade-up-2" style="--accent-color: var(--green); --icon-bg: var(--green-bg); --icon-color: var(--green); --icon-border: rgba(0,255,136,0.2);">
+    <div class="stat-icon"><i class="fas fa-circle-dot"></i></div>
+    <div class="stat-value" data-count="<%= stats.runningVPS || 0 %>"><%= stats.runningVPS || 0 %></div>
+    <div class="stat-label">Running</div>
+  </div>
+  <div class="stat-card fade-up fade-up-3" style="--accent-color: var(--yellow); --icon-bg: var(--yellow-bg); --icon-color: var(--yellow); --icon-border: rgba(255,204,0,0.2);">
+    <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
+    <div class="stat-value" data-count="<%= stats.openTickets || 0 %>"><%= stats.openTickets || 0 %></div>
+    <div class="stat-label">Open Tickets</div>
+  </div>
+  <div class="stat-card fade-up fade-up-4" style="--accent-color: var(--purple); --icon-bg: var(--purple-bg); --icon-color: var(--purple); --icon-border: rgba(153,102,255,0.2);">
+    <div class="stat-icon"><i class="fas fa-microchip"></i></div>
+    <div class="stat-value"><%= stats.totalRAM || 0 %></div>
+    <div class="stat-label">Total RAM (MB)</div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex-wrap: wrap;">
+  <div class="card fade-up">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-server"></i> Your VPS Instances</div>
+      <a href="/vps" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <% if (vpsList && vpsList.length > 0) { %>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Name</th><th>IP</th><th>Status</th><th>Plan</th><th></th></tr></thead>
+          <tbody>
+            <% vpsList.slice(0,6).forEach(function(vps) { %>
+              <tr>
+                <td>
+                  <a href="/vps/<%= vps._id %>" style="color: var(--text-primary); font-weight: 600; text-decoration: none;"><%= vps.name %></a>
+                  <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);"><%= vps.os %></div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan);"><%= vps.network && vps.network.ipv4 ? vps.network.ipv4 : '—' %></td>
+                <td>
+                  <span class="badge badge-<%= vps.status %>" data-vps-status="<%= vps._id %>">
+                    <span class="badge-dot"></span><%= vps.status %>
+                  </span>
+                </td>
+                <td style="font-size: 12px; color: var(--text-muted);"><%= vps.plan.cpu %>vCPU · <%= vps.plan.ram %>MB</td>
+                <td><a href="/vps/<%= vps._id %>" class="btn btn-secondary btn-sm">Manage</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-server"></i></div>
+        <h3>No VPS Deployed</h3>
+        <p>Deploy your first VPS instance to get started</p>
+        <a href="/vps/create" class="btn btn-primary"><i class="fas fa-plus"></i> Deploy VPS</a>
+      </div>
+    <% } %>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="card fade-up">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-ticket-alt"></i> Tickets</div>
+        <a href="/tickets" class="btn btn-secondary btn-sm">All</a>
+      </div>
+      <% if (tickets && tickets.length > 0) { %>
+        <% tickets.slice(0,4).forEach(function(ticket) { %>
+          <a href="/tickets/<%= ticket._id %>" class="ticket-item">
+            <div class="ticket-priority priority-<%= ticket.priority %>"></div>
+            <div class="ticket-info">
+              <div class="ticket-id"><%= ticket.ticketId %></div>
+              <div class="ticket-subject" style="font-size: 13px;"><%= ticket.subject %></div>
+            </div>
+            <span class="badge badge-<%= ticket.status %>" style="font-size: 9px;"><%= ticket.status.replace('_',' ') %></span>
+          </a>
+        <% }); %>
+      <% } else { %>
+        <div class="empty-state" style="padding: 30px 16px;">
+          <div class="empty-state-icon" style="font-size: 28px;"><i class="fas fa-headset"></i></div>
+          <h3 style="font-size: 14px;">No tickets</h3>
+          <a href="/tickets/new" class="btn btn-secondary btn-sm" style="margin-top: 10px;">New Ticket</a>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="card fade-up">
+      <div class="card-header"><div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div></div>
+      <div class="card-body">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <a href="/vps/create" class="btn btn-secondary" style="justify-content: flex-start;"><i class="fas fa-plus-circle"></i> Deploy New VPS</a>
+          <a href="/tickets/new" class="btn btn-secondary" style="justify-content: flex-start;"><i class="fas fa-headset"></i> Open Ticket</a>
+          <a href="/dashboard/profile" class="btn btn-secondary" style="justify-content: flex-start;"><i class="fas fa-user-cog"></i> Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

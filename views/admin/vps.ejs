@@ -1,0 +1,162 @@
+<% var activePage='admin-vps' ; %>
+  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
+    <div>
+      <h2 style="font-size: 22px; font-weight: 800;">VPS Management</h2>
+      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Manage all virtual servers</p>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('createVPSModal').classList.add('active')"><i
+        class="fas fa-plus"></i> Create VPS</button>
+    </div>
+
+    <div class="card animate-in">
+      <div class="table-container" style="border: none; background: none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Owner</th>
+              <th>Specs</th>
+              <th>IP Address</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${typeof vpsList !== 'undefined' && vpsList.length > 0 ? vpsList.map(v =>
+            '<tr>' +
+              '<td>
+                <div><span style="font-weight:600;">' + (v.name || 'Unnamed') + '</span>
+                  <div class="text-sm text-secondary">' + (v.os || 'ubuntu') + ' ' + (v.osVersion || '') + '</div>
+                </div>
+              </td>' +
+              '<td class="text-secondary">' + (v.owner && v.owner.username ? v.owner.username : 'N/A') + '</td>' +
+              '<td class="mono text-sm">' + (v.cpu || 1) + 'C / ' + (v.ram || 512) + 'MB / ' + (v.disk || 10) + 'GB</td>
+              ' +
+              '<td class="mono text-sm">' + (v.ipAddress || 'Pending') + '</td>' +
+              '<td><span class="badge badge-' + (v.status || 'creating') + '"><span class="badge-dot"></span>' +
+                  (v.status || 'creating') + '</span></td>' +
+              '<td>
+                <div class="flex-center gap-8"><button class="btn btn-success btn-sm btn-icon"
+                    onclick="adminVPS(' + (v._id || v.id) + ',\\'start\\')"><i class="fas fa-play"></i></button><button
+                    class="btn btn-warning btn-sm btn-icon" onclick="adminVPS(' + (v._id || v.id) + ',\\'stop\\')"><i
+                      class="fas fa-stop"></i></button><button class="btn btn-danger btn-sm btn-icon"
+                    onclick="deleteVPS(' + (v._id || v.id) + ')"><i class="fas fa-trash"></i></button></div>
+              </td>' +
+              '</tr>'
+            ).join('') : '<tr>
+              <td colspan="6" style="text-align:center; padding:40px;">
+                <div class="empty-state">
+                  <div class="empty-state-icon">🖥️</div>
+                  <h3>No VPS instances</h3>
+                </div>
+              </td>
+            </tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Create VPS Modal -->
+    <div class="modal-overlay" id="createVPSModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title"><i class="fas fa-plus" style="color: var(--accent);"></i> Create New VPS</h3>
+          <button class="modal-close"
+            onclick="document.getElementById('createVPSModal').classList.remove('active')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="createVPSForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">VPS Name</label>
+                <input type="text" name="name" class="form-control" placeholder="my-server" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Hostname</label>
+                <input type="text" name="hostname" class="form-control" placeholder="server01" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner</label>
+              <select name="ownerId" class="form-select" required>
+                <option value="">Select User...</option>
+                ${typeof users !== 'undefined' ? users.map(u => '<option value="' + u.id + '">' + u.username + ' (' +
+                  u.email + ')</option>').join('') : ''}
+              </select>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label class="form-label">OS</label>
+                <select name="os" class="form-select">
+                  <option value="ubuntu">Ubuntu</option>
+                  <option value="debian">Debian</option>
+                  <option value="centos">CentOS</option>
+                  <option value="alpine">Alpine</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">OS Version</label>
+                <input type="text" name="osVersion" class="form-control" value="22.04">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Root Password</label>
+                <input type="text" name="rootPassword" class="form-control" placeholder="Auto-generate">
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label class="form-label">CPU Cores</label>
+                <select name="cpu" class="form-select">
+                  <option value="1">1 vCPU</option>
+                  <option value="2">2 vCPU</option>
+                  <option value="4">4 vCPU</option>
+                  <option value="8">8 vCPU</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">RAM (MB)</label>
+                <select name="ram" class="form-select">
+                  <option value="512">512 MB</option>
+                  <option value="1024">1024 MB</option>
+                  <option value="2048">2048 MB</option>
+                  <option value="4096">4096 MB</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Disk (GB)</label>
+                <select name="disk" class="form-select">
+                  <option value="10">10 GB</option>
+                  <option value="20">20 GB</option>
+                  <option value="40">40 GB</option>
+                  <option value="80">80 GB</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Features</label>
+              <div class="checkbox-group">
+                <label class="checkbox-item checked"
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
+                    type="checkbox" name="nesting" checked> <span>Nesting</span></label>
+                <label class="checkbox-item"
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
+                    type="checkbox" name="kvm"> <span>KVM</span></label>
+                <label class="checkbox-item checked"
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
+                    type="checkbox" name="fuse" checked> <span>FUSE</span></label>
+                <label class="checkbox-item checked"
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
+                    type="checkbox" name="docker" checked> <span>Docker</span></label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea name="notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fas fa-rocket"></i> Create
+              VPS</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    ` }) %>
