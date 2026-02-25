@@ -12,7 +12,7 @@ class LXCManager {
     const containerConfig = this.generateConfig(cpu, ram, disk, features);
     const distro = this.getDistro(os, osVersion);
 
-    const cmd = `lxc-create -n ${name} -t download -- -d ${distro.dist} -r ${distro.release} -a amd64 --no-validate`;
+    const cmd = `lxc-create -n ${name} -t download -- -d ${distro.dist} -r ${distro.release} -a amd64 --server images.linuxcontainers.org`;
     console.log(`[LXC] Creating container: ${cmd}`);
 
     try {
