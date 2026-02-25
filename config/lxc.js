@@ -11,14 +11,19 @@ class LXCManager {
   async createContainer(name, os, osVersion, cpu, ram, disk, features = {}) {
     const containerConfig = this.generateConfig(cpu, ram, disk, features);
     const distro = this.getDistro(os, osVersion);
-    
-    const cmd = `lxc-create -n ${name} -t download -- -d ${distro.dist} -r ${distro.release} -a amd64`;
-    
+
+    const cmd = `lxc-create -n ${name} -t download -- -d ${distro.dist} -r ${distro.release} -a amd64 --no-validate`;
+    console.log(`[LXC] Creating container: ${cmd}`);
+
     try {
-      const { stdout, stderr } = await execAsync(cmd);
+      const { stdout, stderr } = await execAsync(cmd, { timeout: 300000 }); // 5 min timeout
+      console.log(`[LXC] Create output: ${stdout}`);
+      if (stderr) console.warn(`[LXC] Create warning: ${stderr}`);
+
       await this.applyConfig(name, containerConfig);
       return { success: true, output: stdout };
     } catch (err) {
+      console.error(`[LXC] Create failed: ${err.message}`);
       return { success: false, error: err.message };
     }
   }
@@ -59,10 +64,13 @@ lxc.cgroup2.memory.limit_in_bytes = ${ram}M
   }
 
   async startContainer(name) {
+    console.log(`[LXC] Starting container: ${name}`);
     try {
-      const { stdout } = await execAsync(`lxc-start -n ${name}`);
+      const { stdout, stderr } = await execAsync(`lxc-start -n ${name}`);
+      console.log(`[LXC] Start output: ${stdout}`);
       return { success: true };
     } catch (err) {
+      console.error(`[LXC] Start failed: ${err.message}`);
       return { success: false, error: err.message };
     }
   }
