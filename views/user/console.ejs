@@ -58,6 +58,12 @@
 
                 // Join the console session
                 socket.emit('terminal-join', { vpsId, containerId });
+
+                // Push initial size
+                socket.emit('terminal-resize', {
+                    cols: term.cols,
+                    rows: term.rows
+                });
             });
 
             socket.on('disconnect', () => {
@@ -76,6 +82,13 @@
 
             term.onData((data) => {
                 socket.emit('terminal-input', data);
+            });
+
+            term.onResize((size) => {
+                socket.emit('terminal-resize', {
+                    cols: size.cols,
+                    rows: size.rows
+                });
             });
 
             window.addEventListener('resize', () => {

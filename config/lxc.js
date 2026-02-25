@@ -82,11 +82,12 @@ class LXCManager {
   async startContainer(name) {
     console.log(`[LXD] Starting container: ${name}`);
     try {
-      await execAsync(`${this.cmd} start ${name}`);
+      const { stdout, stderr } = await execAsync(`${this.cmd} start ${name}`);
       return { success: true };
     } catch (err) {
-      console.error(`[LXD] Start failed: ${err.message}`);
-      return { success: false, error: err.message };
+      console.error(`[LXD] Start failed for ${name}: ${err.message}`);
+      if (err.stderr) console.error(`[LXD] Start Stderr: ${err.stderr}`);
+      return { success: false, error: err.stderr || err.message };
     }
   }
 

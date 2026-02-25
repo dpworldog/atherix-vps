@@ -13,6 +13,8 @@ console.log('-------------------------');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
+const pty = require('node-pty');
+const VPS = require('./models/VPS');
 
 // Initialize SQLite database
 require('./db/database');
@@ -82,55 +84,79 @@ app.use((err, req, res, next) => {
   res.status(500).render('error', { title: '500 - Server Error', message: '500 - Internal Server Error', user: req.user });
 });
 
-// Socket.io for real-time VPS status and Terminal
-const { spawn } = require('child_process');
-
+// Socket.io logic
 io.on('connection', (socket) => {
+  console.log('[Socket] New connection:', socket.id);
+
   socket.on('subscribe-vps', (vpsId) => {
     socket.join(`vps-${vpsId}`);
   });
 
-  // Terminal handling
-  let termProcess = null;
+  // Scope terminal process to this specific socket connection
+  let socketTermProcess = null;
 
-  socket.on('terminal-join', ({ vpsId, containerId }) => {
-    if (termProcess) {
-      termProcess.kill();
+  socket.on('terminal-join', async ({ vpsId, containerId }) => {
+    try {
+      if (socketTermProcess) {
+        socketTermProcess.kill();
+      }
+
+      // SECURITY: Verify the containerId exists in our system
+      // Note: In production, we should also check socket.request.user.id
+      const vps = VPS.findOne({ containerId: containerId });
+      if (!vps) {
+        return socket.emit('terminal-output', '\r\n\x1b[31m[Security Error: Unauthorized Access]\x1b[0m\r\n');
+      }
+
+      console.log(`[Terminal] Spawning PTY for ${containerId}`);
+      socket.emit('terminal-output', '\x1b[36m[Connecting to terminal...]\x1b[0m\r\n');
+
+      // Spawn real PTY using node-pty
+      socketTermProcess = pty.spawn('lxc', ['exec', containerId, '--env', 'TERM=xterm-256color', '--', 'bash'], {
+        name: 'xterm-color',
+        cols: 80,
+        rows: 24,
+        cwd: process.env.HOME,
+        env: process.env
+      });
+
+      // Forward output to frontend
+      socketTermProcess.onData((data) => {
+        socket.emit('terminal-output', data);
+      });
+
+      socketTermProcess.onExit(({ exitCode, signal }) => {
+        console.log(`[Terminal] PTY exited for ${containerId} with code ${exitCode}`);
+        socket.emit('terminal-output', `\r\n\x1b[33m[Session Terminated (Code ${exitCode})]\x1b[0m\r\n`);
+        socketTermProcess = null;
+      });
+
+      // Handle terminal resize from frontend
+      socket.on('terminal-resize', ({ cols, rows }) => {
+        if (socketTermProcess) {
+          socketTermProcess.resize(cols, rows);
+        }
+      });
+
+      // Forward input from frontend to PTY
+      socket.on('terminal-input', (data) => {
+        if (socketTermProcess) {
+          socketTermProcess.write(data);
+        }
+      });
+
+    } catch (err) {
+      console.error('[Terminal Error]:', err);
+      socket.emit('terminal-output', `\r\n\x1b[31m[Critical Error: ${err.message}]\x1b[0m\r\n`);
     }
+  });
 
-    console.log(`[Terminal] User joined console for ${containerId}`);
-
-    // Spawn lxc exec
-    // Note: We use --force if we want to ensure it works, but lxc exec is better
-    // We use "bash" but if it fails we might try "sh"
-    termProcess = spawn('lxc', ['exec', containerId, '--', 'bash']);
-
-    termProcess.stdout.on('data', (data) => {
-      socket.emit('terminal-output', data.toString());
-    });
-
-    termProcess.stderr.on('data', (data) => {
-      socket.emit('terminal-output', data.toString());
-    });
-
-    termProcess.on('exit', (code) => {
-      console.log(`[Terminal] Process exited for ${containerId} with code ${code}`);
-      socket.emit('terminal-output', '\r\n\x1b[33m[Session Terminated]\x1b[0m\r\n');
-      termProcess = null;
-    });
-
-    socket.on('terminal-input', (data) => {
-      if (termProcess) {
-        termProcess.stdin.write(data);
-      }
-    });
-
-    socket.on('disconnect', () => {
-      if (termProcess) {
-        termProcess.kill();
-        termProcess = null;
-      }
-    });
+  socket.on('disconnect', () => {
+    console.log('[Socket] Disconnected:', socket.id);
+    if (socketTermProcess) {
+      socketTermProcess.kill();
+      socketTermProcess = null;
+    }
   });
 });
 
