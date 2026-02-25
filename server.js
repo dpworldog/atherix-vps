@@ -79,8 +79,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// Seed admin account on startup
+// Seed admin account on startup — always sync password from .env
 const User = require('./models/User');
+const bcrypt = require('bcryptjs');
 const adminEmail = process.env.ADMIN_EMAIL;
 const adminPassword = process.env.ADMIN_PASSWORD;
 if (adminEmail && adminPassword) {
@@ -88,11 +89,13 @@ if (adminEmail && adminPassword) {
   if (!existing) {
     User.create({ username: 'AtherixAdmin', email: adminEmail, password: adminPassword, role: 'admin' });
     console.log('✅ Admin account created:', adminEmail);
-  } else if (existing.role !== 'admin') {
-    User.update(existing.id, { role: 'admin' });
-    console.log('✅ Existing user promoted to admin:', adminEmail);
   } else {
-    console.log('✅ Admin account verified:', adminEmail);
+    // Always ensure admin role + re-sync password from .env
+    const hashedPassword = bcrypt.hashSync(adminPassword, 12);
+    const db = require('./db/database');
+    db.prepare('UPDATE users SET password = ?, role = ?, is_active = 1, is_banned = 0 WHERE id = ?')
+      .run(hashedPassword, 'admin', existing.id);
+    console.log('✅ Admin account synced:', adminEmail);
   }
 }
 
