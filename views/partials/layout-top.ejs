@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title : 'AtherixCloud' %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <canvas id="particles-canvas"></canvas>
+    <div class="app-layout">
+        <%- include('sidebar') %>
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
+            <div class="main-content">
+                <%- include('header') %>
+                    <div class="page-content">
+                        <% if (typeof messages !=='undefined' && messages.success && messages.success.length> 0) { %>
+                            <% messages.success.forEach(function(msg) { %>
+                                <div class="alert alert-success"><i class="fas fa-check-circle"></i>
+                                    <%= msg %>
+                                </div>
+                                <% }); %>
+                                    <% } %>
+                                        <% if (typeof messages !=='undefined' && messages.error &&
+                                            messages.error.length> 0) { %>
+                                            <% messages.error.forEach(function(msg) { %>
+                                                <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i>
+                                                    <%= msg %>
+                                                </div>
+                                                <% }); %>
+                                                    <% } %>

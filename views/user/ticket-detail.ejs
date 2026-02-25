@@ -1,43 +1,62 @@
 <% var activePage='tickets' ; %>
-  <%- include('../partials/layout', { body: ` <a href="/tickets" class="btn btn-secondary btn-sm mb-16"><i
-      class="fas fa-arrow-left"></i> Back to Tickets</a>
+  <%- include('../partials/layout-top') %>
+
+    <a href="/tickets" class="btn btn-secondary btn-sm mb-16"><i class="fas fa-arrow-left"></i> Back to Tickets</a>
 
     <div class="card animate-in mb-24">
       <div class="card-header">
         <div>
-          <h2 style="font-size: 20px; font-weight: 800;">${typeof ticket !== 'undefined' ? ticket.title : 'Ticket'}</h2>
+          <h2 style="font-size: 20px; font-weight: 800;">
+            <%= typeof ticket !=='undefined' ? ticket.title : 'Ticket' %>
+          </h2>
           <div style="display:flex; gap: 8px; margin-top: 6px; align-items: center;">
-            <span class="badge badge-${typeof ticket !== 'undefined' ? (ticket.status || 'open') : 'open'}">${typeof
-              ticket !== 'undefined' ? (ticket.status || 'open') : 'open'}</span>
-            <span
-              class="badge badge-${typeof ticket !== 'undefined' ? (ticket.priority || 'medium') : 'medium'}">${typeof
-              ticket !== 'undefined' ? (ticket.priority || 'medium') : 'medium'}</span>
-            <span class="text-sm text-secondary">#${typeof ticket !== 'undefined' ? (ticket._id || ticket.id) :
-              ''}</span>
+            <span class="badge badge-<%= typeof ticket !== 'undefined' ? (ticket.status || 'open') : 'open' %>">
+              <%= typeof ticket !=='undefined' ? (ticket.status || 'open' ) : 'open' %>
+            </span>
+            <span class="badge badge-<%= typeof ticket !== 'undefined' ? (ticket.priority || 'medium') : 'medium' %>">
+              <%= typeof ticket !=='undefined' ? (ticket.priority || 'medium' ) : 'medium' %>
+            </span>
+            <span class="text-sm text-secondary">#<%= typeof ticket !=='undefined' ? (ticket._id || ticket.id) : '' %>
+                </span>
           </div>
         </div>
       </div>
 
       <div class="chat-messages">
-        ${typeof ticket !== 'undefined' && ticket.messages ? ticket.messages.map(m =>
-        '<div class="chat-msg ' + (m.isAdmin || m.is_admin ? 'admin' : '') + '">' +
-          '<div class="chat-avatar ' + (m.isAdmin || m.is_admin ? 'admin-avatar-msg' : 'user-avatar-msg') + '">' +
-            ((m.sender && m.sender.username) ? m.sender.username.charAt(0).toUpperCase() : '?') + '</div>' +
-          '<div>' +
-            '<div class="chat-bubble">' + (m.message || m.content || '') + '</div>' +
-            '<div class="chat-meta">' + ((m.sender && m.sender.username) || 'User') + ' • ' + new Date(m.createdAt ||
-              m.created_at || Date.now()).toLocaleString() + '</div>' +
-            '</div>' +
-          '</div>'
-        ).join('') : '<p class="text-secondary" style="text-align:center; padding:20px;">No messages yet</p>'}
+        <% if (typeof ticket !=='undefined' && ticket.messages && ticket.messages.length> 0) { %>
+          <% ticket.messages.forEach(function(m) { %>
+            <div class="chat-msg <%= (m.isAdmin || m.is_admin) ? 'admin' : '' %>">
+              <div class="chat-avatar <%= (m.isAdmin || m.is_admin) ? 'admin-avatar-msg' : 'user-avatar-msg' %>">
+                <%= (m.sender && m.sender.username) ? m.sender.username.charAt(0).toUpperCase() : '?' %>
+              </div>
+              <div>
+                <div class="chat-bubble">
+                  <%= m.message || m.content || '' %>
+                </div>
+                <div class="chat-meta">
+                  <%= (m.sender && m.sender.username) || 'User' %> &bull; <%= new Date(m.createdAt || m.created_at ||
+                      Date.now()).toLocaleString() %>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+              <% } else { %>
+                <p class="text-secondary" style="text-align:center; padding:20px;">No messages yet</p>
+                <% } %>
       </div>
 
-      ${typeof ticket !== 'undefined' && ticket.status !== 'closed' ? '<form
-        action="/tickets/' + (ticket._id || ticket.id) + '/reply" method="POST"
-        style="margin-top: 16px; display: flex; gap: 10px;"><textarea name="message" class="form-control"
-          placeholder="Type your reply..." required
-          style="resize: vertical; min-height: 60px; flex: 1;"></textarea><button type="submit" class="btn btn-primary"
-          style="align-self: flex-end;"><i class="fas fa-paper-plane"></i></button></form>' : '<div
-        class="alert alert-info" style="margin-top: 16px;"><i class="fas fa-lock"></i> This ticket is closed</div>'}
+      <% if (typeof ticket !=='undefined' && ticket.status !=='closed' ) { %>
+        <form action="/tickets/<%= ticket._id || ticket.id %>/reply" method="POST"
+          style="margin-top: 16px; display: flex; gap: 10px;">
+          <textarea name="message" class="form-control" placeholder="Type your reply..." required
+            style="resize: vertical; min-height: 60px; flex: 1;"></textarea>
+          <button type="submit" class="btn btn-primary" style="align-self: flex-end;"><i
+              class="fas fa-paper-plane"></i></button>
+        </form>
+        <% } else { %>
+          <div class="alert alert-info" style="margin-top: 16px;"><i class="fas fa-lock"></i> This ticket is closed
+          </div>
+          <% } %>
     </div>
-    ` }) %>
+
+    <%- include('../partials/layout-bottom') %>

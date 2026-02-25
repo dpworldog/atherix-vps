@@ -1,11 +1,13 @@
 <% var activePage='admin-vps' ; %>
-  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
-    <div>
-      <h2 style="font-size: 22px; font-weight: 800;">VPS Management</h2>
-      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Manage all virtual servers</p>
-    </div>
-    <button class="btn btn-primary" onclick="document.getElementById('createVPSModal').classList.add('active')"><i
-        class="fas fa-plus"></i> Create VPS</button>
+  <%- include('../partials/layout-top') %>
+
+    <div class="flex-between mb-24">
+      <div>
+        <h2 style="font-size: 22px; font-weight: 800;">VPS Management</h2>
+        <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Manage all virtual servers</p>
+      </div>
+      <button class="btn btn-primary" onclick="document.getElementById('createVPSModal').classList.add('active')"><i
+          class="fas fa-plus"></i> Create VPS</button>
     </div>
 
     <div class="card animate-in">
@@ -22,35 +24,53 @@
             </tr>
           </thead>
           <tbody>
-            ${typeof vpsList !== 'undefined' && vpsList.length > 0 ? vpsList.map(v =>
-            '<tr>' +
-              '<td>
-                <div><span style="font-weight:600;">' + (v.name || 'Unnamed') + '</span>
-                  <div class="text-sm text-secondary">' + (v.os || 'ubuntu') + ' ' + (v.osVersion || '') + '</div>
-                </div>
-              </td>' +
-              '<td class="text-secondary">' + (v.owner && v.owner.username ? v.owner.username : 'N/A') + '</td>' +
-              '<td class="mono text-sm">' + (v.cpu || 1) + 'C / ' + (v.ram || 512) + 'MB / ' + (v.disk || 10) + 'GB</td>
-              ' +
-              '<td class="mono text-sm">' + (v.ipAddress || 'Pending') + '</td>' +
-              '<td><span class="badge badge-' + (v.status || 'creating') + '"><span class="badge-dot"></span>' +
-                  (v.status || 'creating') + '</span></td>' +
-              '<td>
-                <div class="flex-center gap-8"><button class="btn btn-success btn-sm btn-icon"
-                    onclick="adminVPS(' + (v._id || v.id) + ',\\'start\\')"><i class="fas fa-play"></i></button><button
-                    class="btn btn-warning btn-sm btn-icon" onclick="adminVPS(' + (v._id || v.id) + ',\\'stop\\')"><i
-                      class="fas fa-stop"></i></button><button class="btn btn-danger btn-sm btn-icon"
-                    onclick="deleteVPS(' + (v._id || v.id) + ')"><i class="fas fa-trash"></i></button></div>
-              </td>' +
-              '</tr>'
-            ).join('') : '<tr>
-              <td colspan="6" style="text-align:center; padding:40px;">
-                <div class="empty-state">
-                  <div class="empty-state-icon">🖥️</div>
-                  <h3>No VPS instances</h3>
-                </div>
-              </td>
-            </tr>'}
+            <% if (typeof vpsList !=='undefined' && vpsList.length> 0) { %>
+              <% vpsList.forEach(function(v) { %>
+                <tr>
+                  <td>
+                    <div><span style="font-weight:600;">
+                        <%= v.name || 'Unnamed' %>
+                      </span>
+                      <div class="text-sm text-secondary">
+                        <%= v.os || 'ubuntu' %>
+                          <%= v.osVersion || '' %>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-secondary">
+                    <%= (v.owner && v.owner.username) ? v.owner.username : 'N/A' %>
+                  </td>
+                  <td class="mono text-sm">
+                    <%= v.cpu || 1 %>C / <%= v.ram || 512 %>MB / <%= v.disk || 10 %>GB
+                  </td>
+                  <td class="mono text-sm">
+                    <%= v.ipAddress || 'Pending' %>
+                  </td>
+                  <td><span class="badge badge-<%= v.status || 'creating' %>"><span class="badge-dot"></span>
+                      <%= v.status || 'creating' %>
+                    </span></td>
+                  <td>
+                    <div class="flex-center gap-8">
+                      <button class="btn btn-success btn-sm btn-icon"
+                        onclick="adminVPS(<%= v._id || v.id %>,'start')"><i class="fas fa-play"></i></button>
+                      <button class="btn btn-warning btn-sm btn-icon" onclick="adminVPS(<%= v._id || v.id %>,'stop')"><i
+                          class="fas fa-stop"></i></button>
+                      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteVPS(<%= v._id || v.id %>)"><i
+                          class="fas fa-trash"></i></button>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="6" style="text-align:center; padding:40px;">
+                        <div class="empty-state">
+                          <div class="empty-state-icon">🖥️</div>
+                          <h3>No VPS instances</h3>
+                        </div>
+                      </td>
+                    </tr>
+                    <% } %>
           </tbody>
         </table>
       </div>
@@ -80,8 +100,13 @@
               <label class="form-label">Owner</label>
               <select name="ownerId" class="form-select" required>
                 <option value="">Select User...</option>
-                ${typeof users !== 'undefined' ? users.map(u => '<option value="' + u.id + '">' + u.username + ' (' +
-                  u.email + ')</option>').join('') : ''}
+                <% if (typeof users !=='undefined' ) { %>
+                  <% users.forEach(function(u) { %>
+                    <option value="<%= u.id %>">
+                      <%= u.username %> (<%= u.email %>)
+                    </option>
+                    <% }); %>
+                      <% } %>
               </select>
             </div>
             <div class="form-row-3">
@@ -136,17 +161,21 @@
               <label class="form-label">Features</label>
               <div class="checkbox-group">
                 <label class="checkbox-item checked"
-                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
-                    type="checkbox" name="nesting" checked> <span>Nesting</span></label>
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;">
+                  <input type="checkbox" name="nesting" checked> <span>Nesting</span>
+                </label>
                 <label class="checkbox-item"
-                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
-                    type="checkbox" name="kvm"> <span>KVM</span></label>
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;">
+                  <input type="checkbox" name="kvm"> <span>KVM</span>
+                </label>
                 <label class="checkbox-item checked"
-                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
-                    type="checkbox" name="fuse" checked> <span>FUSE</span></label>
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;">
+                  <input type="checkbox" name="fuse" checked> <span>FUSE</span>
+                </label>
                 <label class="checkbox-item checked"
-                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;"><input
-                    type="checkbox" name="docker" checked> <span>Docker</span></label>
+                  onclick="this.classList.toggle('checked'); this.querySelector('input').checked = !this.querySelector('input').checked;">
+                  <input type="checkbox" name="docker" checked> <span>Docker</span>
+                </label>
               </div>
             </div>
             <div class="form-group">
@@ -159,4 +188,5 @@
         </div>
       </div>
     </div>
-    ` }) %>
+
+    <%- include('../partials/layout-bottom') %>

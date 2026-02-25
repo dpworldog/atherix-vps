@@ -1,46 +1,77 @@
 <% var activePage='vps' ; %>
-  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
-    <div>
-      <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">My Virtual Servers</h2>
-      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Manage and monitor your VPS instances</p>
-    </div>
+  <%- include('../partials/layout-top') %>
+
+    <div class="flex-between mb-24">
+      <div>
+        <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">My Virtual Servers</h2>
+        <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Manage and monitor your VPS instances</p>
+      </div>
     </div>
 
-    ${typeof vpsList !== 'undefined' && vpsList.length > 0 ? '<div class="vps-grid">' + vpsList.map(v => '<div
-        class="vps-card animate-in">
-        <div class="vps-card-header">
-          <div>
-            <div class="vps-name">' + (v.name || 'Unnamed') + '</div>
-            <div class="vps-os"><i class="fab fa-linux"></i> ' + (v.os || 'ubuntu') + ' ' + (v.osVersion || '22.04') + '
+    <% if (typeof vpsList !=='undefined' && vpsList.length> 0) { %>
+      <div class="vps-grid">
+        <% vpsList.forEach(function(v) { %>
+          <div class="vps-card animate-in">
+            <div class="vps-card-header">
+              <div>
+                <div class="vps-name">
+                  <%= v.name || 'Unnamed' %>
+                </div>
+                <div class="vps-os"><i class="fab fa-linux"></i>
+                  <%= v.os || 'ubuntu' %>
+                    <%= v.osVersion || '22.04' %>
+                </div>
+              </div>
+              <span class="badge badge-<%= v.status || 'creating' %>"><span class="badge-dot"></span>
+                <%= v.status || 'creating' %>
+              </span>
             </div>
-          </div><span class="badge badge-' + (v.status || 'creating') + '"><span class="badge-dot"></span>' + (v.status
-            || 'creating') + '</span>
-        </div>
-        <div class="vps-specs">
-          <div class="vps-spec">
-            <div class="vps-spec-value">' + (v.cpu || 1) + '</div>
-            <div class="vps-spec-label">vCPU</div>
+            <div class="vps-specs">
+              <div class="vps-spec">
+                <div class="vps-spec-value">
+                  <%= v.cpu || 1 %>
+                </div>
+                <div class="vps-spec-label">vCPU</div>
+              </div>
+              <div class="vps-spec">
+                <div class="vps-spec-value">
+                  <%= v.ram || 512 %>
+                </div>
+                <div class="vps-spec-label">MB RAM</div>
+              </div>
+              <div class="vps-spec">
+                <div class="vps-spec-value">
+                  <%= v.disk || 10 %>
+                </div>
+                <div class="vps-spec-label">GB Disk</div>
+              </div>
+            </div>
+            <% if (v.ipAddress) { %>
+              <div class="vps-ip"><i class="fas fa-network-wired"></i>
+                <%= v.ipAddress %>
+              </div>
+              <% } %>
+                <div class="vps-actions">
+                  <a href="/vps/<%= v._id || v.id %>" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i>
+                    Details</a>
+                  <button class="btn btn-success btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'start')"><i
+                      class="fas fa-play"></i></button>
+                  <button class="btn btn-warning btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'stop')"><i
+                      class="fas fa-stop"></i></button>
+                  <button class="btn btn-secondary btn-sm" onclick="vpsAction(<%= v._id || v.id %>, 'restart')"><i
+                      class="fas fa-redo"></i></button>
+                </div>
           </div>
-          <div class="vps-spec">
-            <div class="vps-spec-value">' + (v.ram || 512) + '</div>
-            <div class="vps-spec-label">MB RAM</div>
-          </div>
-          <div class="vps-spec">
-            <div class="vps-spec-value">' + (v.disk || 10) + '</div>
-            <div class="vps-spec-label">GB Disk</div>
-          </div>
-        </div>' + (v.ipAddress ? '<div class="vps-ip"><i class="fas fa-network-wired"></i> ' + v.ipAddress + '</div>' :
-        '') + '<div class="vps-actions"><a href="/vps/' + (v._id || v.id) + '" class="btn btn-secondary btn-sm"><i
-              class="fas fa-eye"></i> Details</a><button class="btn btn-success btn-sm"
-            onclick="vpsAction(' + (v._id || v.id) + ', \\'start\\')"><i class="fas fa-play"></i></button><button
-            class="btn btn-warning btn-sm" onclick="vpsAction(' + (v._id || v.id) + ', \\'stop\\')"><i
-              class="fas fa-stop"></i></button><button class="btn btn-secondary btn-sm"
-            onclick="vpsAction(' + (v._id || v.id) + ', \\'restart\\')"><i class="fas fa-redo"></i></button></div>
-      </div>').join('') + '</div>' : '<div class="card">
-      <div class="empty-state">
-        <div class="empty-state-icon">🖥️</div>
-        <h3>No VPS instances</h3>
-        <p>You don\\'t have any virtual servers yet. Contact admin to get started.</p>
+          <% }); %>
       </div>
-    </div>'}
-    ` }) %>
+      <% } else { %>
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-state-icon">🖥️</div>
+            <h3>No VPS instances</h3>
+            <p>You don't have any virtual servers yet. Contact admin to get started.</p>
+          </div>
+        </div>
+        <% } %>
+
+          <%- include('../partials/layout-bottom') %>

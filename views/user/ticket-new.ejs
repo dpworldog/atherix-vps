@@ -1,11 +1,13 @@
 <% var activePage='tickets' ; %>
-  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
-    <div>
-      <h2 style="font-size: 22px; font-weight: 800;">New Support Ticket</h2>
-      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Describe your issue and we'll respond quickly
-      </p>
-    </div>
-    <a href="/tickets" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+  <%- include('../partials/layout-top') %>
+
+    <div class="flex-between mb-24">
+      <div>
+        <h2 style="font-size: 22px; font-weight: 800;">New Support Ticket</h2>
+        <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">Describe your issue and we'll respond
+          quickly</p>
+      </div>
+      <a href="/tickets" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
 
     <div class="card animate-in">
@@ -42,4 +44,5 @@
         <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane"></i> Submit Ticket</button>
       </form>
     </div>
-    ` }) %>
+
+    <%- include('../partials/layout-bottom') %>

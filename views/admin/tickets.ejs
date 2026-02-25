@@ -1,28 +1,45 @@
 <% var activePage='admin-tickets' ; %>
-  <%- include('../partials/layout', { body: ` <div class="flex-between mb-24">
-    <div>
-      <h2 style="font-size: 22px; font-weight: 800;">Ticket Management</h2>
-      <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">View and respond to support tickets</p>
-    </div>
+  <%- include('../partials/layout-top') %>
+
+    <div class="flex-between mb-24">
+      <div>
+        <h2 style="font-size: 22px; font-weight: 800;">Ticket Management</h2>
+        <p class="text-secondary" style="margin-top: 4px; font-size: 13px;">View and respond to support tickets</p>
+      </div>
     </div>
 
-    ${typeof tickets !== 'undefined' && tickets.length > 0 ? tickets.map(t => '<a class="ticket-item animate-in"
-      href="/admin/tickets/' + (t._id || t.id) + '">
-      <div class="ticket-icon"
-        style="background: ' + (t.status === 'open' ? 'var(--accent-dim)' : t.status === 'in-progress' ? 'var(--orange-dim)' : t.status === 'resolved' ? 'var(--green-dim)' : 'rgba(100,100,120,0.1)') + '; color: ' + (t.status === 'open' ? 'var(--accent)' : t.status === 'in-progress' ? 'var(--orange)' : t.status === 'resolved' ? 'var(--green)' : '#888') + ';">
-        <i class="fas fa-ticket-alt"></i></div>
-      <div style="flex:1; min-width:0;">
-        <div style="font-weight:600; font-size:14px;">' + (t.title || 'Untitled') + '</div>
-        <div style="font-size:12px; color:var(--text-secondary);">by ' + (t.user && t.user.username ? t.user.username :
-          'Unknown') + ' • <span class="badge badge-' + (t.priority || 'medium') + '">' + (t.priority || 'medium') +
-            '</span></div>
-      </div><span class="badge badge-' + (t.status || 'open') + '">' + (t.status || 'open') + '</span><i
-        class="fas fa-chevron-right" style="color:var(--text-dim); font-size:12px;"></i>
-    </a>').join('') : '<div class="card">
-      <div class="empty-state">
-        <div class="empty-state-icon">💬</div>
-        <h3>No tickets</h3>
-        <p>All tickets will appear here</p>
-      </div>
-    </div>'}
-    ` }) %>
+    <% if (typeof tickets !=='undefined' && tickets.length> 0) { %>
+      <% tickets.forEach(function(t) { %>
+        <a class="ticket-item animate-in" href="/admin/tickets/<%= t._id || t.id %>">
+          <div class="ticket-icon"
+            style="background: <%= t.status === 'open' ? 'var(--accent-dim)' : t.status === 'in-progress' ? 'var(--orange-dim)' : t.status === 'resolved' ? 'var(--green-dim)' : 'rgba(100,100,120,0.1)' %>; color: <%= t.status === 'open' ? 'var(--accent)' : t.status === 'in-progress' ? 'var(--orange)' : t.status === 'resolved' ? 'var(--green)' : '#888' %>;">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:600; font-size:14px;">
+              <%= t.title || 'Untitled' %>
+            </div>
+            <div style="font-size:12px; color:var(--text-secondary);">
+              by <%= (t.user && t.user.username) ? t.user.username : 'Unknown' %> &bull;
+                <span class="badge badge-<%= t.priority || 'medium' %>">
+                  <%= t.priority || 'medium' %>
+                </span>
+            </div>
+          </div>
+          <span class="badge badge-<%= t.status || 'open' %>">
+            <%= t.status || 'open' %>
+          </span>
+          <i class="fas fa-chevron-right" style="color:var(--text-dim); font-size:12px;"></i>
+        </a>
+        <% }); %>
+          <% } else { %>
+            <div class="card">
+              <div class="empty-state">
+                <div class="empty-state-icon">💬</div>
+                <h3>No tickets</h3>
+                <p>All tickets will appear here</p>
+              </div>
+            </div>
+            <% } %>
+
+              <%- include('../partials/layout-bottom') %>
